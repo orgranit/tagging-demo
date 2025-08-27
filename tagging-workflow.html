@@ -18,26 +18,28 @@
         }
         
         .container {
-            display: flex;
-            gap: 20px;
             max-width: 1400px;
             margin: 0 auto;
         }
         
-        .left-column, .right-column {
+        .main-layout {
+            display: grid;
+            grid-template-columns: 500px 1fr;
+            gap: 20px;
+        }
+        
+        .wizard-area {
             background: white;
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
-        .left-column {
-            flex: 0 0 500px;
-        }
-        
-        .right-column {
-            flex: 1;
-            min-width: 0;
+        .table-area {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         h1 {
@@ -323,107 +325,489 @@
             background-color: #dc3545;
             color: white;
         }
+        
+        /* Wizard Styles */
+        .wizard-header {
+            margin-bottom: 30px;
+        }
+        
+        .wizard-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 0;
+            list-style: none;
+        }
+        
+        .wizard-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            padding: 10px 5px;
+        }
+        
+        .wizard-step:not(:last-child):after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background-color: #e0e0e0;
+            z-index: 1;
+        }
+        
+        .wizard-step.active:not(:last-child):after {
+            background-color: #007bff;
+        }
+        
+        .wizard-step.completed:not(:last-child):after {
+            background-color: #28a745;
+        }
+        
+        .step-indicator {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+            background-color: #e0e0e0;
+            color: #666;
+            border: 3px solid #e0e0e0;
+        }
+        
+        .wizard-step.active .step-indicator {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: white;
+        }
+        
+        .wizard-step.completed .step-indicator {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+        
+        .step-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .wizard-step.active .step-label {
+            color: #007bff;
+            font-weight: 600;
+        }
+        
+        .wizard-step.completed .step-label {
+            color: #28a745;
+        }
+        
+        .wizard-content {
+            min-height: 400px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .wizard-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .wizard-nav-left {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .wizard-nav-right {
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* Table Status Styling & Animations */
+        .attachment-row {
+            transition: all 0.3s ease;
+        }
+        
+        .attachment-row.pending-add {
+            background: linear-gradient(90deg, rgba(40, 167, 69, 0.1) 0%, rgba(40, 167, 69, 0.05) 100%);
+            border-left: 4px solid #28a745;
+            animation: pulse-add 2s infinite;
+        }
+        
+        .attachment-row.pending-remove {
+            background: linear-gradient(90deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.05) 100%);
+            border-left: 4px solid #dc3545;
+            animation: pulse-remove 2s infinite;
+        }
+        
+        .attachment-row.final {
+            background: rgba(0, 123, 255, 0.02);
+            border-left: 4px solid transparent;
+        }
+        
+        @keyframes pulse-add {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.3);
+                border-left-color: #28a745;
+            }
+            50% {
+                box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.1);
+                border-left-color: #34ce57;
+            }
+        }
+        
+        @keyframes pulse-remove {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.3);
+                border-left-color: #dc3545;
+            }
+            50% {
+                box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
+                border-left-color: #e85a6b;
+            }
+        }
+        
+        /* Status indicators */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-width: 70px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        
+        .status-badge.final {
+            background-color: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #bbdefb;
+        }
+        
+        .status-badge.pending-add {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+            animation: glow-add 1.5s ease-in-out infinite alternate;
+        }
+        
+        .status-badge.pending-remove {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+            animation: glow-remove 1.5s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow-add {
+            from {
+                box-shadow: 0 0 2px rgba(40, 167, 69, 0.3);
+            }
+            to {
+                box-shadow: 0 0 6px rgba(40, 167, 69, 0.6);
+            }
+        }
+        
+        @keyframes glow-remove {
+            from {
+                box-shadow: 0 0 2px rgba(220, 53, 69, 0.3);
+            }
+            to {
+                box-shadow: 0 0 6px rgba(220, 53, 69, 0.6);
+            }
+        }
+        
+        /* Req ID styling */
+        .req-link {
+            color: #007bff;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            font-size: 11px;
+            background-color: rgba(0, 123, 255, 0.1);
+            border: 1px solid rgba(0, 123, 255, 0.2);
+        }
+        
+        .req-link:hover {
+            color: white;
+            background-color: #007bff;
+            border-color: #007bff;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+        }
+        
+        /* Table enhancements */
+        .attachments-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .attachments-table thead th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            padding: 12px 8px;
+            border: none;
+        }
+        
+        .attachments-table tbody tr:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        /* Animation Styles */
+        .wizard-applying {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .wizard-applying::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(40, 167, 69, 0.4), transparent);
+            animation: applying-sweep 2s ease-in-out;
+        }
+        
+        @keyframes applying-sweep {
+            0% { left: -100%; }
+            50% { left: 100%; }
+            100% { left: 100%; }
+        }
+        
+        .success-bounce {
+            animation: success-bounce 0.6s ease-out;
+        }
+        
+        @keyframes success-bounce {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.05); }
+            60% { transform: scale(0.95); }
+            100% { transform: scale(1); }
+        }
+        
+        
+        /* Table row animations for different actions */
+        .row-becoming-final {
+            animation: becoming-final 1.2s ease-out forwards;
+        }
+        
+        .row-being-removed {
+            animation: being-removed 1s ease-out forwards;
+        }
+        
+        .row-being-reverted {
+            animation: being-reverted 1s ease-out forwards;
+        }
+        
+        .row-newly-added {
+            animation: newly-added 1s ease-out forwards;
+        }
+        
+        @keyframes becoming-final {
+            0% { 
+                transform: scale(1);
+                background: linear-gradient(90deg, rgba(40, 167, 69, 0.3) 0%, rgba(40, 167, 69, 0.1) 100%);
+                border-left: 4px solid #28a745;
+            }
+            30% { 
+                transform: scale(1.03);
+                background: linear-gradient(90deg, rgba(40, 167, 69, 0.4) 0%, rgba(40, 167, 69, 0.2) 100%);
+                border-left: 4px solid #34ce57;
+                box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+            }
+            70% { 
+                background: linear-gradient(90deg, rgba(40, 167, 69, 0.2) 0%, rgba(40, 167, 69, 0.1) 100%);
+            }
+            100% { 
+                transform: scale(1);
+                background: rgba(0, 123, 255, 0.02);
+                border-left: 4px solid transparent;
+                box-shadow: none;
+            }
+        }
+        
+        @keyframes being-removed {
+            0% { 
+                transform: scale(1);
+                opacity: 1;
+                background: linear-gradient(90deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.05) 100%);
+            }
+            30% { 
+                transform: scale(0.98);
+                background: linear-gradient(90deg, rgba(220, 53, 69, 0.2) 0%, rgba(220, 53, 69, 0.1) 100%);
+                border-left: 4px solid #e85a6b;
+            }
+            60% { 
+                transform: scale(0.95);
+                opacity: 0.7;
+                background: linear-gradient(90deg, rgba(220, 53, 69, 0.15) 0%, rgba(220, 53, 69, 0.08) 100%);
+            }
+            100% { 
+                transform: scale(0.9);
+                opacity: 0;
+                height: 0;
+                padding: 0;
+                margin: 0;
+                border: none;
+            }
+        }
+        
+        @keyframes being-reverted {
+            0% { 
+                transform: scale(1);
+                background: linear-gradient(90deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.05) 100%);
+                border-left: 4px solid #dc3545;
+            }
+            25% { 
+                transform: scale(1.02) rotateZ(-1deg);
+                background: linear-gradient(90deg, rgba(255, 193, 7, 0.2) 0%, rgba(255, 193, 7, 0.1) 100%);
+                border-left: 4px solid #ffc107;
+            }
+            50% { 
+                transform: scale(1) rotateZ(1deg);
+                background: linear-gradient(90deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 193, 7, 0.08) 100%);
+            }
+            75% { 
+                transform: scale(1) rotateZ(-0.5deg);
+                background: linear-gradient(90deg, rgba(0, 123, 255, 0.1) 0%, rgba(0, 123, 255, 0.05) 100%);
+                border-left: 4px solid #007bff;
+            }
+            100% { 
+                transform: scale(1) rotateZ(0deg);
+                background: rgba(0, 123, 255, 0.02);
+                border-left: 4px solid transparent;
+            }
+        }
+        
+        @keyframes newly-added {
+            0% { 
+                transform: scale(0.9) translateY(-10px);
+                opacity: 0;
+                background: rgba(40, 167, 69, 0.3);
+            }
+            30% { 
+                transform: scale(1.05) translateY(0);
+                opacity: 0.8;
+                background: rgba(40, 167, 69, 0.2);
+                border-left: 4px solid #28a745;
+            }
+            60% { 
+                transform: scale(1.02);
+                opacity: 1;
+            }
+            100% { 
+                transform: scale(1);
+                opacity: 1;
+                background: linear-gradient(90deg, rgba(40, 167, 69, 0.1) 0%, rgba(40, 167, 69, 0.05) 100%);
+                border-left: 4px solid #28a745;
+            }
+        }
+        
+        /* Progress spinner for applying */
+        .applying-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #28a745;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="left-column">
-            <h1>Tagging Workflow</h1>
-            
-            <h2>Inputs</h2>
-            
-            <div class="input-group">
-                <label for="vaults">Vaults (comma or newline separated):</label>
-                <textarea id="vaults" rows="3" placeholder="v1, v2, v3">v1,v2</textarea>
-            </div>
-            
-            <div class="input-group">
-                <label for="tagsToAdd">Tags To Add:</label>
-                <textarea id="tagsToAdd" rows="3" placeholder="t1, t2, t3">t1,t2</textarea>
-            </div>
-            
-            <div class="input-group">
-                <label for="tagsToRemove">Tags To Remove:</label>
-                <textarea id="tagsToRemove" rows="3" placeholder="t3, t4">t3</textarea>
-            </div>
-            
-            <h2>Attachments Table</h2>
-            <div id="attachmentsTableContainer">
-                <table class="attachments-table">
-                    <thead>
-                        <tr>
-                            <th>Vault ID</th>
-                            <th>Tag ID</th>
-                            <th>Status</th>
-                            <th>Req ID</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="attachmentsTableBody">
-                    </tbody>
-                </table>
-                <button class="add-row-btn" onclick="addAttachmentRow()">+ Add Row</button>
-            </div>
-            
-            <div class="button-group">
-                <button class="btn-primary" onclick="generateCandidates()">Generate Candidates</button>
-                <button class="btn-warning" onclick="runSanitization()">Run Sanitization</button>
-                <button class="btn-success" onclick="applyToTable()">Apply to Table</button>
-                <button class="btn-secondary" onclick="resetData()">Reset</button>
-            </div>
-        </div>
+        <h1>Tagging Workflow Simulator</h1>
         
-        <div class="right-column">
-            <h1>Results & Progress</h1>
-            
-            <div class="step-panel">
-                <div class="step-header">Step 1: Parsed Inputs</div>
-                <div class="step-content">
-                    <div id="parsedInputs" class="arrays-display">
-                        <div class="empty-state">Click "Generate Candidates" to see parsed inputs</div>
+        <div class="main-layout">
+            <div class="wizard-area">
+                <div class="wizard-header">
+                    <ul class="wizard-steps">
+                        <li class="wizard-step active" data-step="1">
+                            <div class="step-indicator">1</div>
+                            <div class="step-label">Inputs</div>
+                        </li>
+                        <li class="wizard-step" data-step="2">
+                            <div class="step-indicator">2</div>
+                            <div class="step-label">Candidates</div>
+                        </li>
+                        <li class="wizard-step" data-step="3">
+                            <div class="step-indicator">3</div>
+                            <div class="step-label">Sanitization</div>
+                        </li>
+                        <li class="wizard-step" data-step="4">
+                            <div class="step-indicator">4</div>
+                            <div class="step-label">Review</div>
+                        </li>
+                        <li class="wizard-step" data-step="5">
+                            <div class="step-indicator">5</div>
+                            <div class="step-label">Apply</div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="wizard-content" id="wizardContent">
+                    <!-- Step 1 content loads here on page load -->
+                </div>
+                
+                <div class="wizard-navigation">
+                    <div class="wizard-nav-left">
+                        <button class="btn-secondary" id="prevBtn" onclick="previousStep()" disabled>Previous</button>
+                        <button class="btn-secondary" onclick="resetWizard()">Reset</button>
+                    </div>
+                    <div class="wizard-nav-right">
+                        <button class="btn-primary" id="nextBtn" onclick="nextStep()">Next</button>
                     </div>
                 </div>
             </div>
             
-            <div class="step-panel">
-                <div class="step-header">Step 2: Candidates</div>
-                <div class="step-content">
-                    <div id="candidatesTable">
-                        <div class="empty-state">No candidates generated yet</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="step-panel">
-                <div class="step-header">Step 3: Sanitization Log</div>
-                <div class="step-content">
-                    <div id="sanitizationLog" class="log-container">
-                        <div class="empty-state">Run sanitization to see processing log</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="step-panel">
-                <div class="step-header">Step 4: Results</div>
-                <div class="step-content">
-                    <h3>Valid Pairs</h3>
-                    <div id="validPairsTable">
-                        <div class="empty-state">No valid pairs yet</div>
-                    </div>
-                    
-                    <h3>Removed Vaults</h3>
-                    <div id="removedVaults">
-                        <div class="empty-state">No vaults removed yet</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="step-panel">
-                <div class="step-header">Step 5: Updated Attachments</div>
-                <div class="step-content">
-                    <div id="updatedAttachmentsTable">
-                        <div class="empty-state">Apply changes to see updated table</div>
-                    </div>
+            <div class="table-area">
+                <h2>Attachments Table</h2>
+                <div id="attachmentsTableContainer">
+                    <table class="attachments-table">
+                        <thead>
+                            <tr>
+                                <th>Vault ID</th>
+                                <th>Tag ID</th>
+                                <th>Status</th>
+                                <th>Req ID</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attachmentsTableBody">
+                        </tbody>
+                    </table>
+                    <button class="add-row-btn" onclick="addAttachmentRow()">+ Add Row</button>
                 </div>
             </div>
         </div>
@@ -456,6 +840,8 @@
         let currentSanitizationLog = [];
         let currentModalReqId = null;
         let requestMetadata = {}; // Store request metadata by reqId
+        let currentWizardStep = 1;
+        const maxSteps = 5;
 
         // Initialize with starter data
         function initializeStarterData() {
@@ -547,14 +933,14 @@
                         isValid = false;
                         reason = 'already exists';
                     } else {
-                        // Rule 2b: Check capacity limit (count existing + pending + current batch)
+                        // Rule 2b: Check capacity limit (count existing + pending + current batch + this candidate)
                         const existingCount = attachments.filter(att => 
                             att.vaultId === vaultId && att.status !== 'pending remove'
                         ).length;
                         const currentBatchCount = validPairCount.get(vaultId) || 0;
-                        const totalCount = existingCount + currentBatchCount;
+                        const totalCountAfterAdding = existingCount + currentBatchCount + 1;
                         
-                        if (totalCount >= 3) {
+                        if (totalCountAfterAdding > 3) {
                             isValid = false;
                             reason = 'capacity reached (max 3)';
                         }
@@ -777,17 +1163,25 @@
                     `<span class="req-link" onclick="showRequestModal('${att.reqId}')">${att.reqId}</span>` : 
                     '<span style="color: #6c757d;">-</span>';
                 
+                // Determine row class based on status
+                let rowClass = 'attachment-row';
+                if (att.status === 'pending add') {
+                    rowClass += ' pending-add';
+                } else if (att.status === 'pending remove') {
+                    rowClass += ' pending-remove';
+                } else {
+                    rowClass += ' final';
+                }
+                
+                // Create status badge (clickable to cycle through states)
+                const statusClass = att.status.replace(' ', '-');
+                const statusBadge = `<span class="status-badge ${statusClass}" onclick="cycleStatus(${index})" style="cursor: pointer;" title="Click to change status">${att.status}</span>`;
+                
                 return `
-                <tr>
+                <tr class="${rowClass}">
                     <td><input type="text" value="${att.vaultId}" onchange="updateAttachment(${index}, 'vaultId', this.value)"></td>
                     <td><input type="text" value="${att.tagId}" onchange="updateAttachment(${index}, 'tagId', this.value)"></td>
-                    <td>
-                        <select onchange="updateAttachment(${index}, 'status', this.value)">
-                            <option value="final" ${att.status === 'final' ? 'selected' : ''}>final</option>
-                            <option value="pending add" ${att.status === 'pending add' ? 'selected' : ''}>pending add</option>
-                            <option value="pending remove" ${att.status === 'pending remove' ? 'selected' : ''}>pending remove</option>
-                        </select>
-                    </td>
+                    <td>${statusBadge}</td>
                     <td>${reqIdCell}</td>
                     <td><button class="btn-secondary" style="font-size: 11px; padding: 2px 6px;" onclick="removeAttachment(${index})">Remove</button></td>
                 </tr>
@@ -926,6 +1320,18 @@
                 currentAttachments[index][field] = value;
             }
         }
+        
+        function cycleStatus(index) {
+            if (index >= 0 && index < currentAttachments.length) {
+                const statuses = ['final', 'pending add', 'pending remove'];
+                const currentStatus = currentAttachments[index].status;
+                const currentIndex = statuses.indexOf(currentStatus);
+                const nextIndex = (currentIndex + 1) % statuses.length;
+                
+                currentAttachments[index].status = statuses[nextIndex];
+                renderAttachmentsTable();
+            }
+        }
 
         function removeAttachment(index) {
             currentAttachments.splice(index, 1);
@@ -1003,9 +1409,20 @@
         function approveRequest() {
             if (!currentModalReqId) return;
             
+            // Store reqId before closing modal (which clears currentModalReqId)
+            const reqId = currentModalReqId;
+            
+            // Close modal immediately
+            closeRequestModal();
+            
+            // Find affected attachments and their actions before changes
+            const affectedAttachments = currentAttachments
+                .map((att, index) => ({ att, originalIndex: index }))
+                .filter(item => item.att.reqId === reqId);
+            
             // Process each attachment with this reqId
             currentAttachments = currentAttachments.filter(att => {
-                if (att.reqId === currentModalReqId) {
+                if (att.reqId === reqId) {
                     if (att.status === 'pending remove') {
                         // Remove the attachment completely
                         return false;
@@ -1019,18 +1436,130 @@
             
             renderAttachmentsTable();
             renderUpdatedAttachments(currentAttachments);
-            closeRequestModal();
+            
+            // Animate rows based on their specific changes
+            setTimeout(() => {
+                affectedAttachments.forEach((item, idx) => {
+                    const { att } = item;
+                    
+                    if (att.status === 'pending remove') {
+                        // This row will be removed
+                        const row = document.querySelector(`#attachmentsTableBody tr:nth-child(${item.originalIndex + 1})`);
+                        if (row) {
+                            row.classList.add('row-being-removed');
+                            setTimeout(() => {
+                                if (row.parentNode) {
+                                    row.remove();
+                                }
+                            }, 1000);
+                        }
+                    } else if (att.status === 'pending add') {
+                        // This row becomes final - find its new position
+                        setTimeout(() => {
+                            const newRows = document.querySelectorAll('#attachmentsTableBody tr');
+                            const targetRow = Array.from(newRows).find(row => {
+                                const vaultCell = row.cells[0].querySelector('input');
+                                const tagCell = row.cells[1].querySelector('input');
+                                return vaultCell && tagCell && 
+                                       vaultCell.value === att.vaultId && 
+                                       tagCell.value === att.tagId;
+                            });
+                            if (targetRow) {
+                                targetRow.classList.add('row-becoming-final');
+                                setTimeout(() => targetRow.classList.remove('row-becoming-final'), 1200);
+                            }
+                        }, 50);
+                    }
+                });
+            }, 100);
         }
 
         function rejectRequest() {
             if (!currentModalReqId) return;
             
-            // Remove all rows with this reqId 
-            currentAttachments = currentAttachments.filter(att => att.reqId !== currentModalReqId);
+            // Store reqId before closing modal (which clears currentModalReqId)
+            const reqId = currentModalReqId;
+            
+            // Close modal immediately
+            closeRequestModal();
+            
+            // Find affected attachments and their actions before changes
+            const affectedAttachments = currentAttachments
+                .map((att, index) => ({ att, originalIndex: index }))
+                .filter(item => item.att.reqId === reqId);
+            
+            console.log('Rejecting request:', reqId);
+            console.log('Attachments before reject:', currentAttachments.filter(att => att.reqId === reqId));
+            
+            // Handle rejection based on the request type
+            const newAttachments = [];
+            
+            for (const att of currentAttachments) {
+                if (att.reqId === reqId) {
+                    console.log('Processing attachment:', att);
+                    if (att.status === 'pending add') {
+                        // Remove pending add rows (they never existed)
+                        console.log('Removing pending add:', att);
+                        // Don't add to newAttachments (effectively removing it)
+                    } else if (att.status === 'pending remove') {
+                        // Revert pending remove back to final status
+                        console.log('Reverting pending remove to final:', att);
+                        newAttachments.push({
+                            ...att,
+                            status: 'final',
+                            reqId: null
+                        });
+                    } else {
+                        // Keep other statuses as-is
+                        newAttachments.push(att);
+                    }
+                } else {
+                    // Keep attachments not part of this request
+                    newAttachments.push(att);
+                }
+            }
+            
+            currentAttachments = newAttachments;
+            console.log('Attachments after reject:', currentAttachments);
             
             renderAttachmentsTable();
             renderUpdatedAttachments(currentAttachments);
-            closeRequestModal();
+            
+            // Animate rows based on their specific changes
+            setTimeout(() => {
+                affectedAttachments.forEach((item) => {
+                    const { att } = item;
+                    
+                    if (att.status === 'pending add') {
+                        // This row will be removed (it was never a real attachment)
+                        const row = document.querySelector(`#attachmentsTableBody tr:nth-child(${item.originalIndex + 1})`);
+                        if (row) {
+                            row.classList.add('row-being-removed');
+                            setTimeout(() => {
+                                if (row.parentNode) {
+                                    row.remove();
+                                }
+                            }, 1000);
+                        }
+                    } else if (att.status === 'pending remove') {
+                        // This row gets reverted back to final - find its new position
+                        setTimeout(() => {
+                            const newRows = document.querySelectorAll('#attachmentsTableBody tr');
+                            const targetRow = Array.from(newRows).find(row => {
+                                const vaultCell = row.cells[0].querySelector('input');
+                                const tagCell = row.cells[1].querySelector('input');
+                                return vaultCell && tagCell && 
+                                       vaultCell.value === att.vaultId && 
+                                       tagCell.value === att.tagId;
+                            });
+                            if (targetRow) {
+                                targetRow.classList.add('row-being-reverted');
+                                setTimeout(() => targetRow.classList.remove('row-being-reverted'), 1000);
+                            }
+                        }, 50);
+                    }
+                });
+            }, 100);
         }
 
         // Close modal when clicking outside
@@ -1041,9 +1570,381 @@
             }
         }
 
+        // Wizard Functions
+        function showWizardStep(step) {
+            currentWizardStep = step;
+            
+            // Update step indicators
+            document.querySelectorAll('.wizard-step').forEach((el, index) => {
+                const stepNum = index + 1;
+                el.classList.remove('active', 'completed');
+                
+                if (stepNum === step) {
+                    el.classList.add('active');
+                } else if (stepNum < step) {
+                    el.classList.add('completed');
+                    el.querySelector('.step-indicator').textContent = '✓';
+                } else {
+                    el.querySelector('.step-indicator').textContent = stepNum;
+                }
+            });
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = step === 1;
+            const nextBtn = document.getElementById('nextBtn');
+            
+            if (step === maxSteps) {
+                nextBtn.textContent = 'Apply Changes';
+                nextBtn.className = 'btn-success';
+            } else {
+                nextBtn.textContent = 'Next';
+                nextBtn.className = 'btn-primary';
+            }
+            
+            // Load step content
+            loadStepContent(step);
+        }
+        
+        function loadStepContent(step) {
+            const content = document.getElementById('wizardContent');
+            
+            switch(step) {
+                case 1:
+                    content.innerHTML = getStep1Content();
+                    // Show initial input preview immediately
+                    updateInputPreview();
+                    break;
+                case 2:
+                    content.innerHTML = getStep2Content();
+                    renderCandidatesInWizard();
+                    break;
+                case 3:
+                    content.innerHTML = getStep3Content();
+                    renderSanitizationInWizard();
+                    break;
+                case 4:
+                    content.innerHTML = getStep4Content();
+                    renderReviewInWizard();
+                    break;
+                case 5:
+                    content.innerHTML = getStep5Content();
+                    break;
+            }
+        }
+        
+        function getStep1Content() {
+            return `
+                <h3>Configure Inputs</h3>
+                
+                <div class="input-group">
+                    <label for="vaults">Vaults:</label>
+                    <textarea id="vaults" rows="3" placeholder="v1, v2, v3" oninput="updateInputPreview()">v1,v2</textarea>
+                </div>
+                
+                <div class="input-group">
+                    <label for="tagsToAdd">Tags To Add:</label>
+                    <textarea id="tagsToAdd" rows="3" placeholder="t1, t2, t3" oninput="updateInputPreview()">t1,t2</textarea>
+                </div>
+                
+                <div class="input-group">
+                    <label for="tagsToRemove">Tags To Remove:</label>
+                    <textarea id="tagsToRemove" rows="3" placeholder="t3, t4" oninput="updateInputPreview()">t3</textarea>
+                </div>
+                
+                <div id="parsedInputsPreview" class="arrays-display" style="margin-top: 20px;">
+                </div>
+            `;
+        }
+        
+        function getStep2Content() {
+            return `
+                <h3>Generated Candidates</h3>
+                <p>Review the candidate pairs generated from your inputs. Conflicts (same vault/tag in both add and remove) are resolved by preferring remove operations.</p>
+                <div id="candidatesWizardContent">
+                    <div class="empty-state">Generating candidates...</div>
+                </div>
+            `;
+        }
+        
+        function getStep3Content() {
+            return `
+                <h3>Sanitization Process</h3>
+                <p>Watch the sequential validation of each candidate pair. Failed pairs cause their entire vault to be removed from the batch.</p>
+                <div id="sanitizationWizardContent">
+                    <div class="empty-state">Running sanitization...</div>
+                </div>
+            `;
+        }
+        
+        function getStep4Content() {
+            return `
+                <h3>Review Results</h3>
+                <p>Review the final valid pairs and any removed vaults before applying changes.</p>
+                <div id="reviewWizardContent">
+                    <div class="empty-state">Preparing results...</div>
+                </div>
+            `;
+        }
+        
+        function getStep5Content() {
+            return `
+                <h3>Changes Applied</h3>
+                <p>Your changes have been applied to the attachments table. A new request has been created that you can approve or reject from the table.</p>
+                <div id="applyWizardContent">
+                    <div class="empty-state">Applying changes...</div>
+                </div>
+            `;
+        }
+        
+        function nextStep() {
+            if (currentWizardStep < maxSteps) {
+                // Process current step before moving to next
+                processCurrentStep();
+                showWizardStep(currentWizardStep + 1);
+            } else {
+                // Apply changes on final step
+                applyChangesFromWizard();
+            }
+        }
+        
+        function previousStep() {
+            if (currentWizardStep > 1) {
+                showWizardStep(currentWizardStep - 1);
+            }
+        }
+        
+        function resetWizard() {
+            // Reset all data
+            currentCandidates = [];
+            currentValidPairs = [];
+            currentRemovedVaults = [];
+            currentSanitizationLog = [];
+            
+            // Go back to step 1
+            showWizardStep(1);
+        }
+        
+        function processCurrentStep() {
+            switch(currentWizardStep) {
+                case 1:
+                    generateCandidatesInWizard();
+                    break;
+                case 2:
+                    runSanitizationInWizard();
+                    break;
+                case 3:
+                    // Sanitization already complete, just move to review
+                    break;
+                case 4:
+                    // Review complete, prepare for apply
+                    break;
+            }
+        }
+        
+        function generateCandidatesInWizard() {
+            const vaultsStr = document.getElementById('vaults').value;
+            const addTagsStr = document.getElementById('tagsToAdd').value;
+            const removeTagsStr = document.getElementById('tagsToRemove').value;
+            
+            const vaults = parseList(vaultsStr);
+            const addTags = parseList(addTagsStr);
+            const removeTags = parseList(removeTagsStr);
+            
+            currentCandidates = buildCandidates(vaults, addTags, removeTags);
+            
+            // Update parsed inputs preview in step 1
+            const preview = document.getElementById('parsedInputsPreview');
+            if (preview) {
+                preview.innerHTML = `
+                    <div><strong>Vaults:</strong> [${vaults.map(v => `"${v}"`).join(', ')}]</div>
+                    <div><strong>Tags To Add:</strong> [${addTags.map(t => `"${t}"`).join(', ')}]</div>
+                    <div><strong>Tags To Remove:</strong> [${removeTags.map(t => `"${t}"`).join(', ')}]</div>
+                `;
+            }
+        }
+        
+        function runSanitizationInWizard() {
+            const result = sanitizeCandidates(currentCandidates, currentAttachments);
+            currentValidPairs = result.validPairs;
+            currentRemovedVaults = result.removedVaults;
+            currentSanitizationLog = result.log;
+        }
+        
+        function applyChangesFromWizard() {
+            const wizardContent = document.getElementById('wizardContent');
+            const content = document.getElementById('applyWizardContent');
+            
+            // Start applying animation
+            wizardContent.classList.add('wizard-applying');
+            content.innerHTML = `
+                <div style="background-color: #e3f2fd; border: 1px solid #bbdefb; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
+                    <h4 style="color: #1565c0; margin: 0 0 10px 0;">
+                        <span class="applying-spinner"></span>Applying Changes...
+                    </h4>
+                    <p style="color: #1565c0; margin: 0;">Processing your request and updating the attachments table.</p>
+                </div>
+            `;
+            
+            // Simulate processing time and then apply changes
+            setTimeout(() => {
+                if (currentValidPairs.length > 0) {
+                    currentAttachments = applyValidPairs(currentValidPairs, currentAttachments);
+                    renderAttachmentsTable();
+                    
+                    // Add success animation to table area
+                    const tableArea = document.querySelector('.table-area');
+                    tableArea.classList.add('success-bounce');
+                    
+                    // Show completion message
+                    const reqIds = [...new Set(currentAttachments.filter(att => att.reqId).map(att => att.reqId))];
+                    const latestReqId = reqIds[reqIds.length - 1];
+                    
+                    content.innerHTML = `
+                        <div style="background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
+                            <h4 style="color: #155724; margin: 0 0 10px 0;">✅ Changes Applied Successfully</h4>
+                            <p style="color: #155724; margin: 0;">
+                                ${currentValidPairs.length} pair(s) have been applied as request <strong>${latestReqId}</strong>.
+                                Click on the request ID in the attachments table to review and approve/reject the changes.
+                            </p>
+                        </div>
+                        <div>
+                            <h4>Applied Changes:</h4>
+                            <ul>
+                                ${currentValidPairs.map(pair => `
+                                    <li>${pair.action} ${pair.tagId} ${pair.action === 'add' ? 'to' : 'from'} vault ${pair.vaultId}</li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    `;
+                    
+                    // Clean up animations
+                    setTimeout(() => {
+                        wizardContent.classList.remove('wizard-applying');
+                        tableArea.classList.remove('success-bounce');
+                    }, 1000);
+                } else {
+                    content.innerHTML = `
+                        <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px; padding: 15px;">
+                            <h4 style="color: #856404; margin: 0 0 10px 0;">⚠️ No Changes Applied</h4>
+                            <p style="color: #856404; margin: 0;">No valid pairs were found. All candidates were filtered out during sanitization.</p>
+                        </div>
+                    `;
+                    wizardContent.classList.remove('wizard-applying');
+                }
+            }, 1500); // 1.5 second delay to show the applying animation
+        }
+        
+        function renderCandidatesInWizard() {
+            const container = document.getElementById('candidatesWizardContent');
+            if (currentCandidates.length === 0) {
+                container.innerHTML = '<div class="empty-state">No candidates generated</div>';
+                return;
+            }
+            
+            const table = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Vault ID</th>
+                            <th>Tag ID</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${currentCandidates.map(c => `
+                            <tr>
+                                <td>${c.vaultId}</td>
+                                <td>${c.tagId}</td>
+                                <td>${c.action}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            container.innerHTML = table;
+        }
+        
+        function renderSanitizationInWizard() {
+            const container = document.getElementById('sanitizationWizardContent');
+            if (currentSanitizationLog.length === 0) {
+                container.innerHTML = '<div class="empty-state">Running sanitization...</div>';
+                return;
+            }
+            
+            const logEntries = currentSanitizationLog.map(entry => {
+                if (entry.vaultRemoved) {
+                    return `<div class="log-entry vault-removed">Step ${entry.step}: ${entry.reason}</div>`;
+                } else {
+                    const cssClass = entry.status === 'PASS' ? 'pass' : 'fail';
+                    const candidateStr = `{${entry.candidate.vaultId}, ${entry.candidate.tagId}, ${entry.candidate.action}}`;
+                    return `<div class="log-entry ${cssClass}">Step ${entry.step}: ${candidateStr} → ${entry.status} (${entry.reason})</div>`;
+                }
+            }).join('');
+            
+            container.innerHTML = `<div class="log-container">${logEntries}</div>`;
+        }
+        
+        function renderReviewInWizard() {
+            const container = document.getElementById('reviewWizardContent');
+            
+            let validPairsHtml = '';
+            if (currentValidPairs.length > 0) {
+                validPairsHtml = `
+                    <h4>Valid Pairs (${currentValidPairs.length})</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Vault ID</th>
+                                <th>Tag ID</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${currentValidPairs.map(p => `
+                                <tr>
+                                    <td>${p.vaultId}</td>
+                                    <td>${p.tagId}</td>
+                                    <td>${p.action}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                validPairsHtml = '<h4>Valid Pairs</h4><div class="empty-state">No valid pairs</div>';
+            }
+            
+            let removedVaultsHtml = '';
+            if (currentRemovedVaults.length > 0) {
+                removedVaultsHtml = `<div class="removed-vaults" style="margin-top: 20px;">Removed vaults: ${currentRemovedVaults.join(', ')}</div>`;
+            }
+            
+            container.innerHTML = validPairsHtml + removedVaultsHtml;
+        }
+        
+        function updateInputPreview() {
+            const vaultsEl = document.getElementById('vaults');
+            const addTagsEl = document.getElementById('tagsToAdd');
+            const removeTagsEl = document.getElementById('tagsToRemove');
+            const previewEl = document.getElementById('parsedInputsPreview');
+            
+            if (!vaultsEl || !addTagsEl || !removeTagsEl || !previewEl) return;
+            
+            const vaults = parseList(vaultsEl.value);
+            const addTags = parseList(addTagsEl.value);
+            const removeTags = parseList(removeTagsEl.value);
+            
+            previewEl.innerHTML = `
+                <div><strong>Vaults:</strong> [${vaults.map(v => `"${v}"`).join(', ')}]</div>
+                <div><strong>Tags To Add:</strong> [${addTags.map(t => `"${t}"`).join(', ')}]</div>
+                <div><strong>Tags To Remove:</strong> [${removeTags.map(t => `"${t}"`).join(', ')}]</div>
+            `;
+        }
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             initializeStarterData();
+            showWizardStep(1);
         });
     </script>
 </body>
