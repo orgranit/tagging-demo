@@ -925,13 +925,16 @@
                     isValid = false;
                     reason = 'vault removed earlier';
                 } else if (action === 'add') {
-                    // Rule 2a: Check if attachment already exists
+                    // Rule 2a: Check if attachment already exists or has pending request
                     const existingAttachment = attachments.find(att => 
                         att.vaultId === vaultId && att.tagId === tagId
                     );
-                    if (existingAttachment) {
+                    if (existingAttachment && existingAttachment.status === 'final') {
                         isValid = false;
                         reason = 'already exists';
+                    } else if (existingAttachment && existingAttachment.status.startsWith('pending')) {
+                        isValid = false;
+                        reason = 'pending request exists';
                     } else {
                         // Rule 2b: Check capacity limit (count existing + pending + current batch + this candidate)
                         const existingCount = attachments.filter(att => 
@@ -946,13 +949,19 @@
                         }
                     }
                 } else if (action === 'remove') {
-                    // Rule 3: Can only remove existing attachments
+                    // Rule 3: Can only remove existing final attachments, not pending ones
                     const existingAttachment = attachments.find(att => 
                         att.vaultId === vaultId && att.tagId === tagId
                     );
                     if (!existingAttachment) {
                         isValid = false;
                         reason = 'attachment does not exist';
+                    } else if (existingAttachment.status.startsWith('pending')) {
+                        isValid = false;
+                        reason = 'pending request exists';
+                    } else if (existingAttachment.status !== 'final') {
+                        isValid = false;
+                        reason = 'not a final attachment';
                     }
                 }
                 
