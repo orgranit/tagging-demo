@@ -894,6 +894,98 @@
             font-style: italic;
             padding: 20px;
         }
+
+        /* Tags Table Styles */
+        .tags-section {
+            margin-top: 30px;
+        }
+
+        .tags-table {
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .tags-table thead th {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            padding: 12px 8px;
+            border: none;
+        }
+
+        .tags-table input {
+            width: 100%;
+            border: none;
+            padding: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .tags-table select {
+            width: 100%;
+            border: none;
+            padding: 4px;
+            font-size: 12px;
+        }
+
+        .tags-table .protected-checkbox {
+            text-align: center;
+        }
+
+        .tags-table .protected-checkbox input[type="checkbox"] {
+            width: auto;
+            transform: scale(1.2);
+        }
+
+        .tag-status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .tag-status-badge.final {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+
+        .tag-status-badge.pending-edit {
+            background-color: #fff3e0;
+            color: #ef6c00;
+            border: 1px solid #ffcc02;
+            animation: glow-edit 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow-edit {
+            from {
+                box-shadow: 0 0 2px rgba(255, 152, 0, 0.3);
+            }
+            to {
+                box-shadow: 0 0 6px rgba(255, 152, 0, 0.6);
+            }
+        }
+
+        .tag-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .tag-actions button {
+            padding: 2px 6px;
+            font-size: 10px;
+        }
     </style>
 </head>
 
@@ -965,6 +1057,8 @@
                     <button class="add-row-btn" onclick="addAttachmentRow()">+ Add Row</button>
                 </div>
 
+                <!-- Edge Cases Simulator - Commented Out -->
+                <!--
                 <div class="edge-cases-section">
                     <div class="edge-cases-header">
                         <h3 class="edge-cases-title">Edge Cases Simulator</h3>
@@ -972,6 +1066,28 @@
                     </div>
                     <div id="edgeCasesList" class="edge-cases-list">
                         <div class="edge-case-empty">Analyzing current table state...</div>
+                    </div>
+                </div>
+                -->
+
+                <div class="tags-section">
+                    <h2>Tags Management</h2>
+                    <div id="tagsTableContainer">
+                        <table class="tags-table">
+                            <thead>
+                                <tr>
+                                    <th>Tag ID</th>
+                                    <th>Label</th>
+                                    <th>Protected</th>
+                                    <th>Status</th>
+                                    <th>Req ID</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tagsTableBody">
+                            </tbody>
+                        </table>
+                        <button class="add-row-btn" onclick="addTag()">+ Add Tag</button>
                     </div>
                 </div>
             </div>
@@ -1008,13 +1124,17 @@
         let currentWizardStep = 1;
         const maxSteps = 5;
 
+        // Tags management
+        let currentTags = [];
+        let tagRequestMetadata = {}; // Store tag request metadata by reqId
+
         // Initialize with random starter data
         function initializeStarterData() {
             currentAttachments = generateRandomAttachments();
 
             renderAttachmentsTable();
             clearResults();
-            generateEdgeCases(); // Generate initial edge cases
+            initializeTags(); // Initialize tags table
         }
 
         function generateRandomAttachments() {
@@ -1078,7 +1198,8 @@
             return attachments;
         }
 
-        // Edge Cases Simulator Functions
+        // Edge Cases Simulator Functions - Commented Out
+        /*
         function generateEdgeCases() {
             const edgeCases = [];
             const vaults = [...new Set(currentAttachments.map(att => att.vaultId))];
@@ -1342,6 +1463,257 @@
             setTimeout(() => {
                 item.style.background = 'white';
             }, 300);
+        }
+        */
+
+        // Tags Management Functions
+        function getTagById(tagId) {
+            return currentTags.find(tag => tag.id === tagId);
+        }
+
+        function getTagLabel(tagId) {
+            const tag = getTagById(tagId);
+            return tag ? tag.label : tagId; // fallback to ID if tag not found
+        }
+
+        function initializeTags() {
+            currentTags = [
+                { id: 't1', label: 't1', isProtected: false, status: 'final', reqId: null },
+                { id: 't2', label: 't2', isProtected: true, status: 'final', reqId: null },
+                { id: 't3', label: 't3', isProtected: false, status: 'final', reqId: null },
+                { id: 't4', label: 't4', isProtected: true, status: 'final', reqId: null },
+                { id: 't5', label: 't5', isProtected: false, status: 'final', reqId: null }
+            ];
+            renderTagsTable();
+        }
+
+        function renderTagsTable() {
+            const tbody = document.getElementById('tagsTableBody');
+            tbody.innerHTML = currentTags.map((tag, index) => {
+                const reqIdCell = tag.reqId ? 
+                    `<span class="req-link" onclick="showTagRequestModal('${tag.reqId}')">${tag.reqId}</span>` : 
+                    '<span style="color: #6c757d;">-</span>';
+
+                const statusBadge = `<span class="tag-status-badge ${tag.status.replace(' ', '-')}">${tag.status}</span>`;
+                
+                const isEditable = tag.status === 'final';
+                
+                return `
+                <tr>
+                    <td>
+                        <input type="text" value="${tag.id}" 
+                               onchange="updateTag(${index}, 'id', this.value)"
+                               ${!isEditable ? 'disabled' : ''} 
+                               style="font-family: monospace; font-weight: 600;">
+                    </td>
+                    <td>
+                        <input type="text" value="${tag.label}" 
+                               onchange="updateTag(${index}, 'label', this.value)"
+                               ${!isEditable ? 'disabled' : ''}>
+                    </td>
+                    <td class="protected-checkbox">
+                        <input type="checkbox" ${tag.isProtected ? 'checked' : ''} 
+                               onchange="updateTag(${index}, 'isProtected', this.checked)"
+                               ${!isEditable ? 'disabled' : ''}>
+                    </td>
+                    <td>${statusBadge}</td>
+                    <td>${reqIdCell}</td>
+                    <td class="tag-actions">
+                        <button class="btn-secondary" onclick="deleteTag(${index})" 
+                                ${!isEditable ? 'disabled' : ''}>Delete</button>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        function addTag() {
+            // Generate unique ID
+            let newId;
+            do {
+                newId = `t${currentTags.length + 1}`;
+                // If ID exists, try with timestamp suffix
+                if (currentTags.some(tag => tag.id === newId)) {
+                    newId = `t${Date.now()}`;
+                }
+            } while (currentTags.some(tag => tag.id === newId));
+
+            const newTag = {
+                id: newId,
+                label: `Tag ${currentTags.length + 1}`,
+                isProtected: false,
+                status: 'final',
+                reqId: null
+            };
+            currentTags.push(newTag);
+            renderTagsTable();
+        }
+
+        function updateTag(index, field, value) {
+            if (index < 0 || index >= currentTags.length) return;
+            
+            const tag = currentTags[index];
+            const oldValue = tag[field];
+            
+            // Special validation for tag ID changes
+            if (field === 'id' && oldValue !== value) {
+                // Check if old ID is used in attachments
+                const hasAttachments = currentAttachments.some(att => att.tagId === oldValue);
+                if (hasAttachments) {
+                    alert(`Cannot change tag ID "${oldValue}" - it has existing attachments. Remove attachments first or create a new tag.`);
+                    renderTagsTable(); // Reset the input field
+                    return;
+                }
+                
+                // Check if new ID already exists
+                const idExists = currentTags.some((t, i) => i !== index && t.id === value);
+                if (idExists) {
+                    alert(`Tag ID "${value}" already exists. Please choose a different ID.`);
+                    renderTagsTable(); // Reset the input field
+                    return;
+                }
+            }
+            
+            // If it's a protected tag being edited, create approval request
+            if (tag.isProtected && tag.status === 'final' && oldValue !== value) {
+                const reqId = `TAG-REQ-${String(Date.now()).slice(-6)}`;
+                
+                // Create pending edit version
+                tag.status = 'pendingEdit';
+                tag.reqId = reqId;
+                
+                // Store metadata for approval
+                tagRequestMetadata[reqId] = {
+                    tagId: tag.id,
+                    field: field,
+                    oldValue: oldValue,
+                    newValue: value,
+                    timestamp: new Date().toISOString()
+                };
+                
+                alert(`Protected tag edit requires approval. Request ${reqId} created.`);
+            } else if (!tag.isProtected || tag.status !== 'final') {
+                // Direct update for non-protected tags or non-final status
+                tag[field] = value;
+            }
+            
+            renderTagsTable();
+        }
+
+        function deleteTag(index) {
+            if (index < 0 || index >= currentTags.length) return;
+            
+            const tag = currentTags[index];
+            
+            // Check if tag has any attachments
+            const hasAttachments = currentAttachments.some(att => att.tagId === tag.id);
+            if (hasAttachments) {
+                alert(`Cannot delete tag "${tag.label}" - it has existing attachments. Remove all attachments first.`);
+                return;
+            }
+            
+            // If it's a protected tag, create approval request
+            if (tag.isProtected && tag.status === 'final') {
+                const reqId = `TAG-DEL-${String(Date.now()).slice(-6)}`;
+                
+                tag.status = 'pendingEdit';
+                tag.reqId = reqId;
+                
+                tagRequestMetadata[reqId] = {
+                    tagId: tag.id,
+                    field: 'delete',
+                    oldValue: tag,
+                    newValue: null,
+                    timestamp: new Date().toISOString()
+                };
+                
+                alert(`Protected tag deletion requires approval. Request ${reqId} created.`);
+                renderTagsTable();
+            } else {
+                // Direct delete for non-protected tags
+                currentTags.splice(index, 1);
+                renderTagsTable();
+            }
+        }
+
+        function showTagRequestModal(reqId) {
+            const metadata = tagRequestMetadata[reqId];
+            if (!metadata) return;
+            
+            currentModalReqId = reqId;
+            document.getElementById('modalTitle').textContent = `Tag Request ${reqId}`;
+            
+            const modalBody = document.getElementById('modalBody');
+            let actionDescription = '';
+            
+            if (metadata.field === 'delete') {
+                actionDescription = `<strong>Delete Tag:</strong> "${metadata.oldValue.label}" (${metadata.oldValue.isProtected ? 'Protected' : 'Not Protected'})`;
+            } else {
+                actionDescription = `<strong>Edit Tag:</strong> Change ${metadata.field} from "${metadata.oldValue}" to "${metadata.newValue}"`;
+            }
+            
+            modalBody.innerHTML = `
+                <div style="background-color: #fff3e0; padding: 15px; margin-bottom: 20px; border-radius: 6px; border-left: 4px solid #ff9800;">
+                    <h4 style="margin: 0 0 10px 0; color: #ef6c00;">Tag Modification Request</h4>
+                    <div style="margin-bottom: 8px;">
+                        ${actionDescription}
+                    </div>
+                    <div style="margin-top: 8px; font-size: 11px; color: #6c757d;">
+                        Created: ${new Date(metadata.timestamp).toLocaleString()}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('requestModal').style.display = 'block';
+        }
+
+        function approveTagRequest() {
+            if (!currentModalReqId || !currentModalReqId.startsWith('TAG-')) return;
+            
+            const reqId = currentModalReqId;
+            const metadata = tagRequestMetadata[reqId];
+            if (!metadata) return;
+            
+            closeRequestModal();
+            
+            // Find the tag
+            const tagIndex = currentTags.findIndex(tag => tag.id === metadata.tagId);
+            if (tagIndex === -1) return;
+            
+            if (metadata.field === 'delete') {
+                // Delete the tag
+                currentTags.splice(tagIndex, 1);
+            } else {
+                // Apply the edit
+                const tag = currentTags[tagIndex];
+                tag[metadata.field] = metadata.newValue;
+                tag.status = 'final';
+                tag.reqId = null;
+            }
+            
+            delete tagRequestMetadata[reqId];
+            renderTagsTable();
+        }
+
+        function rejectTagRequest() {
+            if (!currentModalReqId || !currentModalReqId.startsWith('TAG-')) return;
+            
+            const reqId = currentModalReqId;
+            const metadata = tagRequestMetadata[reqId];
+            if (!metadata) return;
+            
+            closeRequestModal();
+            
+            // Find the tag and revert to final state
+            const tagIndex = currentTags.findIndex(tag => tag.id === metadata.tagId);
+            if (tagIndex !== -1) {
+                const tag = currentTags[tagIndex];
+                tag.status = 'final';
+                tag.reqId = null;
+            }
+            
+            delete tagRequestMetadata[reqId];
+            renderTagsTable();
         }
 
         // Parse comma or newline separated list
@@ -1675,10 +2047,14 @@
                 const statusClass = att.status.replace(' ', '-');
                 const statusBadge = `<span class="status-badge ${statusClass}" onclick="cycleStatus(${index})" style="cursor: pointer;" title="Click to change status">${att.status}</span>`;
 
+                // Get tag info for tooltip
+                const tag = getTagById(att.tagId);
+                const tagTooltip = tag ? `${tag.label} (${tag.isProtected ? 'Protected' : 'Not Protected'})` : 'Tag not found';
+
                 return `
                 <tr class="${rowClass}">
                     <td><input type="text" value="${att.vaultId}" onchange="updateAttachment(${index}, 'vaultId', this.value)"></td>
-                    <td><input type="text" value="${att.tagId}" onchange="updateAttachment(${index}, 'tagId', this.value)"></td>
+                    <td><input type="text" value="${att.tagId}" onchange="updateAttachment(${index}, 'tagId', this.value)" title="${tagTooltip}" style="font-family: monospace;"></td>
                     <td>${statusBadge}</td>
                     <td>${reqIdCell}</td>
                     <td><button class="btn-secondary" style="font-size: 11px; padding: 2px 6px;" onclick="removeAttachment(${index})">Remove</button></td>
@@ -1686,8 +2062,8 @@
             `;
             }).join('');
 
-            // Refresh edge cases when table changes
-            generateEdgeCases();
+            // Refresh edge cases when table changes - Commented out
+            // generateEdgeCases();
         }
 
         function renderUpdatedAttachments(attachments) {
@@ -1818,7 +2194,22 @@
 
         function updateAttachment(index, field, value) {
             if (index >= 0 && index < currentAttachments.length) {
+                // Validate tag ID exists when changing tagId
+                if (field === 'tagId') {
+                    const tagExists = currentTags.some(tag => tag.id === value);
+                    if (!tagExists && value.trim() !== '') {
+                        alert(`Tag ID "${value}" does not exist. Please create the tag first or use an existing tag ID.`);
+                        renderAttachmentsTable(); // Reset the input field
+                        return;
+                    }
+                }
+                
                 currentAttachments[index][field] = value;
+                
+                // Re-render to update tooltips if tagId changed
+                if (field === 'tagId') {
+                    renderAttachmentsTable();
+                }
             }
         }
 
@@ -1910,6 +2301,12 @@
         function approveRequest() {
             if (!currentModalReqId) return;
 
+            // Check if it's a tag request
+            if (currentModalReqId.startsWith('TAG-')) {
+                approveTagRequest();
+                return;
+            }
+
             // Store reqId before closing modal (which clears currentModalReqId)
             const reqId = currentModalReqId;
 
@@ -1977,6 +2374,12 @@
 
         function rejectRequest() {
             if (!currentModalReqId) return;
+
+            // Check if it's a tag request
+            if (currentModalReqId.startsWith('TAG-')) {
+                rejectTagRequest();
+                return;
+            }
 
             // Store reqId before closing modal (which clears currentModalReqId)
             const reqId = currentModalReqId;
