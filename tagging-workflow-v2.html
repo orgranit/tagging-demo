@@ -158,6 +158,13 @@
             opacity: 0.9;
         }
 
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #6c757d !important;
+            color: #ffffff !important;
+        }
+
         .btn-primary {
             background-color: #007bff;
             color: white;
@@ -2438,11 +2445,30 @@
                     att.tagId === tag.id && att.status.startsWith('pending')
                 );
 
-                const isEditable = tag.status === 'final' && !hasPendingOperations;
+                // Check if tag has any references in attachments table
+                const hasAttachments = currentAttachments.some(att => att.tagId === tag.id);
+
+                // Check if protected tag has pending request (can't have multiple reqIDs)
+                const hasPendingRequest = tag.isProtected && tag.reqId;
+
+                const isEditable = tag.status === 'final' && !hasPendingOperations && !hasPendingRequest;
+                const isDeletable = tag.status === 'final' && !hasAttachments && !hasPendingRequest;
                 
                 // Add title for disabled input to explain why it's disabled
-                const disabledTitle = hasPendingOperations ?
-                    'Label cannot be edited while tag has pending attach/detach operations' : '';
+                let disabledTitle = '';
+                if (hasPendingOperations) {
+                    disabledTitle = 'Label cannot be edited while tag has pending attach/detach operations';
+                } else if (hasPendingRequest) {
+                    disabledTitle = 'Label cannot be edited while tag has pending approval request';
+                }
+                
+                // Add title for disabled delete button
+                let deleteDisabledTitle = '';
+                if (hasAttachments) {
+                    deleteDisabledTitle = 'Cannot delete tag with existing attachments. Remove all attachments first.';
+                } else if (hasPendingRequest) {
+                    deleteDisabledTitle = 'Cannot delete tag while it has pending approval request';
+                }
 
                 return `
                 <tr>
@@ -2463,7 +2489,8 @@
                     <td>${reqIdCell}</td>
                     <td class="tag-actions">
                         <button class="btn-secondary" onclick="deleteTag(${index})" 
-                                ${!isEditable ? 'disabled' : ''}>Delete</button>
+                                ${!isDeletable ? 'disabled' : ''}
+                                ${deleteDisabledTitle ? `title="${deleteDisabledTitle}"` : ''}>Delete</button>
                     </td>
                 </tr>
                 `;
@@ -2593,6 +2620,19 @@
                 }
             }
 
+            // Special validation for label changes
+            if (field === 'label' && oldValue !== value) {
+                // Check if new label already exists (case-insensitive)
+                const labelExists = currentTags.some((t, i) => 
+                    i !== index && t.label.toLowerCase() === value.trim().toLowerCase()
+                );
+                if (labelExists) {
+                    alert(`Label "${value.trim()}" already exists. Please choose a different label.`);
+                    renderTagsTable(); // Reset the input field
+                    return;
+                }
+            }
+
             // If it's a protected tag being edited, create approval request
             if (tag.isProtected && tag.status === 'final' && oldValue !== value) {
                 const reqId = `TAG-REQ-${String(Date.now()).slice(-6)}`;
@@ -2703,6 +2743,18 @@
                 // Delete the tag
                 currentTags.splice(tagIndex, 1);
             } else {
+                // For label changes, check for conflicts with existing labels
+                if (metadata.field === 'label') {
+                    const conflictingTag = currentTags.find((t, i) => 
+                        i !== tagIndex && t.label.toLowerCase() === metadata.newValue.toLowerCase()
+                    );
+                    
+                    if (conflictingTag) {
+                        // Conflict detected - this approval wins, alert user
+                        alert(`Label conflict detected! This request wins. Label "${metadata.newValue}" was already taken by another tag, but this approval takes priority.`);
+                    }
+                }
+                
                 // Apply the edit
                 const tag = currentTags[tagIndex];
                 tag[metadata.field] = metadata.newValue;
