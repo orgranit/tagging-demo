@@ -1457,10 +1457,11 @@
                                     <h4 style="color: #dc3545; margin: 20px 0 10px 0;">⚠️ Validation Rules</h4>
                                     <ul style="margin: 0; padding-left: 20px; font-size: 13px;">
                                         <li>Tag IDs must be unique and case-sensitive</li>
-                                        <li>Cannot delete tags with existing attachments (includes pending
-                                            attach/detach)</li>
-                                        <li>Tags with "pending edit" status cannot be used in attach/detach</li>
-                                        <li>Tags with pending attachment operations cannot be deleted</li>
+                                        <li><strong>Tag labels must be unique</strong> (case-insensitive validation)</li>
+                                        <li>Cannot delete tags with existing attachments</li>
+                                        <li>Cannot edit/delete protected tags with pending approval requests</li>
+                                        <li>Protected tags cannot have multiple simultaneous approval requests</li>
+                                        <li>Tags with "pending edit" status cannot be used in attach/detach operations</li>
                                         <li>All input arrays must reference existing valid tags</li>
                                     </ul>
                                 </div>
@@ -1477,28 +1478,38 @@
 
                                     <div class="example-case"
                                         style="margin-bottom: 12px; padding: 8px; background: #fff3cd; border-radius: 4px;">
-                                        <div style="font-weight: 600; font-size: 12px; color: #856404;">Tag Deletion
-                                            Blocked:</div>
-                                        <div style="font-size: 12px; color: #333;">Try to delete tag "t1" but
-                                            attachments exist → <span style="color: #dc3545; font-weight: 600;">deletion
+                                        <div style="font-weight: 600; font-size: 12px; color: #856404;">Duplicate Label
+                                            Prevention:</div>
+                                        <div style="font-size: 12px; color: #333;">Try to change tag label to "compliance" but
+                                            another tag already uses it → <span style="color: #dc3545; font-weight: 600;">edit
                                                 rejected</span></div>
                                     </div>
 
                                     <div class="example-case"
                                         style="margin-bottom: 12px; padding: 8px; background: #d4edda; border-radius: 4px;">
-                                        <div style="font-weight: 600; font-size: 12px; color: #155724;">Tag Edit
-                                            Workflow:</div>
+                                        <div style="font-weight: 600; font-size: 12px; color: #155724;">Protected Tag
+                                            Request:</div>
                                         <div style="font-size: 12px; color: #333;">Edit protected tag label → creates
-                                            approval request → status becomes "pending edit"</div>
+                                            approval request → editing/deleting disabled until resolved</div>
                                     </div>
 
                                     <div class="example-case"
                                         style="margin-bottom: 12px; padding: 8px; background: #f8d7da; border-radius: 4px;">
-                                        <div style="font-weight: 600; font-size: 12px; color: #721c24;">Pending
-                                            Attachments Block:</div>
-                                        <div style="font-size: 12px; color: #333;">Try to use tag "t1" in operation, but
-                                            t1 has pending attachment → <span
-                                                style="color: #dc3545; font-weight: 600;">operation rejected</span>
+                                        <div style="font-weight: 600; font-size: 12px; color: #721c24;">Conflict
+                                            Resolution:</div>
+                                        <div style="font-size: 12px; color: #333;">Two pending requests for same label →
+                                            first approval wins → <span
+                                                style="color: #28a745; font-weight: 600;">winner gets priority</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="example-case"
+                                        style="margin-bottom: 12px; padding: 8px; background: #e2e3e5; border-radius: 4px;">
+                                        <div style="font-weight: 600; font-size: 12px; color: #383d41;">Delete Button
+                                            States:</div>
+                                        <div style="font-size: 12px; color: #333;">Disabled when tag has attachments OR
+                                            pending approval requests → <span
+                                                style="color: #6c757d; font-weight: 600;">tooltip shows reason</span>
                                         </div>
                                     </div>
                                 </div>
