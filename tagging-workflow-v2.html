@@ -84,12 +84,12 @@
             font-size: 13px;
             transition: border-color 0.2s, background-color 0.2s;
         }
-        
+
         textarea.invalid {
             border-color: #dc3545;
             background-color: #fff5f5;
         }
-        
+
         .validation-error {
             color: #dc3545;
             font-size: 12px;
@@ -972,6 +972,7 @@
             from {
                 box-shadow: 0 0 2px rgba(255, 152, 0, 0.3);
             }
+
             to {
                 box-shadow: 0 0 6px rgba(255, 152, 0, 0.6);
             }
@@ -1237,14 +1238,26 @@
 <body>
     <div class="container">
         <h1>Tagging Workflow Simulator V2</h1>
-        <div class="behavior-section" onclick="showBehaviorModal()" style="background: #e3f2fd; border: 1px solid #90caf9; border-radius: 4px; padding: 10px; margin-bottom: 15px; font-size: 13px; color: #1565c0; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#bbdefb'" onmouseout="this.style.backgroundColor='#e3f2fd'">
-            <strong>📋 System Rules & Behavior</strong> (Click to view details) - Validation rules, sanitization logic, and protection-based workflows
+        <div class="behavior-section" onclick="showBehaviorModal()"
+            style="background: #e3f2fd; border: 1px solid #90caf9; border-radius: 4px; padding: 10px; margin-bottom: 15px; font-size: 13px; color: #1565c0; cursor: pointer; transition: background-color 0.2s;"
+            onmouseover="this.style.backgroundColor='#bbdefb'" onmouseout="this.style.backgroundColor='#e3f2fd'">
+            <strong>📋 System Rules & Behavior</strong> (Click to view details) - Validation rules, sanitization logic,
+            and protection-based workflows
         </div>
-        
-        <div class="api-examples-section" style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; margin-bottom: 20px;">
-            <div style="margin-bottom: 10px; font-weight: 600; color: #495057; font-size: 14px;">🚀 API Response Examples</div>
+
+        <div class="api-examples-section"
+            style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; margin-bottom: 20px;">
+            <div style="margin-bottom: 10px; font-weight: 600; color: #495057; font-size: 14px;">🚀 API Response
+                Examples</div>
             <div class="api-buttons" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="btn-secondary" onclick="showValidationErrorsModal()" style="font-size: 12px; padding: 6px 12px;">⚠️ Validation Errors</button>
+                <button class="btn-secondary" onclick="showValidationErrorsModal()"
+                    style="font-size: 12px; padding: 6px 12px;">⚠️ Validation Errors</button>
+                <button class="btn-secondary" onclick="showSanitizationResultsModal()"
+                    style="font-size: 12px; padding: 6px 12px;">🔍 Sanitization Results</button>
+                <button class="btn-secondary" onclick="showProtectionWorkflowsModal()"
+                    style="font-size: 12px; padding: 6px 12px;">🔒 Protection Workflows</button>
+                <button class="btn-secondary" onclick="showSuccessFailureModal()"
+                    style="font-size: 12px; padding: 6px 12px;">✅ Success & Failure</button>
             </div>
         </div>
 
@@ -1401,7 +1414,8 @@
                         <div class="rule-item valid">
                             <div class="rule-icon">✅</div>
                             <div class="rule-content">
-                                <strong>Vault Removed from Processing:</strong> Only when capacity would be exceeded (>3 attachments per vault)
+                                <strong>Vault Removed from Processing:</strong> Only when capacity would be exceeded (>3
+                                attachments per vault)
                             </div>
                         </div>
                         <div class="rule-item invalid">
@@ -1450,15 +1464,20 @@
                             <h5>Examples</h5>
                             <div class="example-case">
                                 <div class="example-scenario">Capacity Exceeded:</div>
-                                <div class="example-details">Vault v1 has 2 final + 1 pending → trying to add 2 more → <span class="fail">entire vault removed</span></div>
+                                <div class="example-details">Vault v1 has 2 final + 1 pending → trying to add 2 more →
+                                    <span class="fail">entire vault removed</span>
+                                </div>
                             </div>
                             <div class="example-case">
                                 <div class="example-scenario">Already Exists:</div>
-                                <div class="example-details">Add t1 to v1, but v1-t1 already final → <span class="fail">operation rejected</span></div>
+                                <div class="example-details">Add t1 to v1, but v1-t1 already final → <span
+                                        class="fail">operation rejected</span></div>
                             </div>
                             <div class="example-case">
                                 <div class="example-scenario">Protected Tag:</div>
-                                <div class="example-details">Add compliance tag → <span class="pending">creates pending request</span>, Add general-use tag → <span class="success">applied immediately</span></div>
+                                <div class="example-details">Add compliance tag → <span class="pending">creates pending
+                                        request</span>, Add general-use tag → <span class="success">applied
+                                        immediately</span></div>
                             </div>
                         </div>
                     </div>
@@ -1498,8 +1517,9 @@
                 <button class="close" onclick="closeValidationErrorsModal()">&times;</button>
             </div>
             <div class="validation-errors-body" style="padding: 20px;">
-                <p style="margin-bottom: 20px; color: #6c757d; font-size: 13px;">Examples of API validation error responses (400 Bad Request) for different invalid input cases:</p>
-                
+                <p style="margin-bottom: 20px; color: #6c757d; font-size: 13px;">Examples of API validation error
+                    responses (400 Bad Request) for different invalid input cases:</p>
+
                 <div class="error-example">
                     <h5>🔢 Array Size Violations</h5>
                     <pre class="json-response">{
@@ -1613,6 +1633,249 @@
         </div>
     </div>
 
+    <!-- Sanitization Results Modal -->
+    <div id="sanitizationResultsModal" class="modal">
+        <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3 class="modal-title">🔍 Sanitization Results</h3>
+                <button class="close" onclick="closeSanitizationResultsModal()">&times;</button>
+            </div>
+            <div class="validation-errors-body" style="padding: 20px;">
+                <p style="margin-bottom: 20px; color: #6c757d; font-size: 13px;">API sanitization responses (200 OK)
+                    when individual operations are rejected or vaults are removed:</p>
+
+                <div class="error-example">
+                    <h5>❌ Individual Operation Rejections</h5>
+                    <pre class="json-response">HTTP 200 OK
+{
+  "status": "partial_success",
+  "message": "Some operations rejected during sanitization",
+  "applied_operations": [
+    {"vault": "v1", "tag": "general-use", "action": "add", "status": "final"}
+  ],
+  "pending_operations": [],
+  "rejected_operations": [
+    {"vault": "v2", "tag": "compliance", "action": "add", "reason": "attachment_already_exists"},
+    {"vault": "v3", "tag": "general-use", "action": "remove", "reason": "attachment_not_found"},
+    {"vault": "v4", "tag": "kyc-required", "action": "add", "reason": "pending_request_exists"},
+    {"vault": "v5", "tag": "compliance", "action": "remove", "reason": "tag_being_modified"}
+  ],
+  "removed_vaults": []
+}</pre>
+                </div>
+
+                <div class="error-example">
+                    <h5>🚧 Capacity Exceeded (Vault Removal)</h5>
+                    <pre class="json-response">HTTP 200 OK
+{
+  "status": "partial_success",
+  "message": "Vaults removed due to capacity exceeded",
+  "applied_operations": [
+    {"vault": "v1", "tag": "general-use", "action": "add", "status": "final"}
+  ],
+  "pending_operations": [
+    {"vault": "v2", "tag": "compliance", "action": "add", "status": "pending", "request_id": "REQ-456789"}
+  ],
+  "rejected_operations": [],
+  "removed_vaults": [
+    {"vault": "v3", "reason": "capacity_exceeded", "current_attachments": 3, "attempted_additions": 2}
+  ]
+}</pre>
+                </div>
+
+                <div class="error-example">
+                    <h5>🔄 Mixed Rejections & Vault Removal</h5>
+                    <pre class="json-response">HTTP 200 OK
+{
+  "status": "partial_success",
+  "message": "Mixed sanitization issues occurred",
+  "applied_operations": [
+    {"vault": "v1", "tag": "general-use", "action": "add", "status": "final"}
+  ],
+  "pending_operations": [],
+  "rejected_operations": [
+    {"vault": "v2", "tag": "compliance", "action": "add", "reason": "attachment_already_exists"}
+  ],
+  "removed_vaults": [
+    {"vault": "v3", "reason": "capacity_exceeded", "current_attachments": 3, "attempted_additions": 1}
+  ]
+}</pre>
+                </div>
+
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 6px; margin-top: 20px;">
+                    <h6 style="margin: 0 0 10px 0; color: #1565c0;">Rejection Reasons:</h6>
+                    <div style="font-size: 12px; color: #1565c0;">
+                        • <strong>attachment_already_exists:</strong> Trying to add an attachment that is already
+                        final<br>
+                        • <strong>attachment_not_found:</strong> Trying to remove an attachment that doesn't exist<br>
+                        • <strong>pending_request_exists:</strong> Another pending request exists for the same vault-tag
+                        pair<br>
+                        • <strong>tag_being_modified:</strong> Tag became unavailable due to concurrent editing
+                    </div>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-secondary" onclick="closeSanitizationResultsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Protection Workflows Modal -->
+    <div id="protectionWorkflowsModal" class="modal">
+        <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3 class="modal-title">🔒 Protection Workflows</h3>
+                <button class="close" onclick="closeProtectionWorkflowsModal()">&times;</button>
+            </div>
+            <div class="validation-errors-body" style="padding: 20px;">
+                <p style="margin-bottom: 20px; color: #6c757d; font-size: 13px;">API responses (200 OK) for protected vs
+                    non-protected tag operations and approval workflows:</p>
+
+                <div class="error-example">
+                    <h5>🔄 Mixed Protection Levels</h5>
+                    <pre class="json-response">HTTP 200 OK
+{
+  "status": "partial_success",
+  "message": "Operations processed with mixed protection levels",
+  "applied_operations": [
+    {"vault": "v1", "tag": "general-use", "action": "add", "status": "final"},
+    {"vault": "v2", "tag": "general-use", "action": "remove", "status": "final"}
+  ],
+  "pending_operations": [
+    {"vault": "v3", "tag": "compliance", "action": "add", "status": "pending", "request_id": "REQ-789123"},
+    {"vault": "v4", "tag": "kyc-required", "action": "remove", "status": "pending", "request_id": "REQ-789123"}
+  ],
+  "rejected_operations": [],
+  "removed_vaults": []
+}</pre>
+                </div>
+
+                <div class="error-example">
+                    <h5>🔒 All Protected (Approval Required)</h5>
+                    <pre class="json-response">HTTP 200 OK
+{
+  "status": "approval_required",
+  "message": "All operations require approval",
+  "applied_operations": [],
+  "pending_operations": [
+    {"vault": "v1", "tag": "compliance", "action": "add", "status": "pending", "request_id": "REQ-111222"},
+    {"vault": "v2", "tag": "kyc-required", "action": "remove", "status": "pending", "request_id": "REQ-111222"},
+    {"vault": "v3", "tag": "compliance", "action": "remove", "status": "pending", "request_id": "REQ-333444"}
+  ],
+  "rejected_operations": [],
+  "removed_vaults": []
+}</pre>
+                </div>
+
+                <div class="error-example">
+                    <h5>⚡ All Non-Protected (Immediate)</h5>
+                    <pre class="json-response">HTTP 200 OK
+{
+  "status": "success",
+  "message": "All non-protected operations applied immediately",
+  "applied_operations": [
+    {"vault": "v1", "tag": "general-use", "action": "add", "status": "final"},
+    {"vault": "v2", "tag": "general-use", "action": "remove", "status": "final"}
+  ],
+  "pending_operations": [],
+  "rejected_operations": [],
+  "removed_vaults": []
+}</pre>
+                </div>
+
+                <div style="background: #fff3e0; padding: 15px; border-radius: 6px; margin-top: 20px;">
+                    <h6 style="margin: 0 0 10px 0; color: #ef6c00;">Request ID Behavior:</h6>
+                    <div style="font-size: 12px; color: #ef6c00;">
+                        • <strong>Same request_id:</strong> Operations that can be approved/rejected together<br>
+                        • <strong>Different request_id:</strong> Operations requiring separate approval workflows<br>
+                        • <strong>No request_id:</strong> Non-protected operations applied immediately
+                    </div>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-secondary" onclick="closeProtectionWorkflowsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success & Failure Modal -->
+    <div id="successFailureModal" class="modal">
+        <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3 class="modal-title">✅ Success & Failure Scenarios</h3>
+                <button class="close" onclick="closeSuccessFailureModal()">&times;</button>
+            </div>
+            <div class="validation-errors-body" style="padding: 20px;">
+                <p style="margin-bottom: 20px; color: #6c757d; font-size: 13px;">API responses (200 OK) for complete
+                    success and complete failure scenarios:</p>
+
+                <div class="error-example">
+                    <h5>✅ Complete Success</h5>
+                    <pre class="json-response">HTTP 200 OK
+{
+  "status": "success",
+  "message": "All operations applied successfully",
+  "applied_operations": [
+    {"vault": "v1", "tag": "general-use", "action": "add", "status": "final"},
+    {"vault": "v2", "tag": "general-use", "action": "remove", "status": "final"},
+    {"vault": "v3", "tag": "general-use", "action": "add", "status": "final"}
+  ],
+  "pending_operations": [],
+  "rejected_operations": [],
+  "removed_vaults": []
+}</pre>
+                </div>
+
+                <div class="error-example">
+                    <h5>❌ All Operations Rejected</h5>
+                    <pre class="json-response">HTTP 200 OK
+{
+  "status": "no_operations_applied",
+  "message": "All operations were rejected during sanitization",
+  "applied_operations": [],
+  "pending_operations": [],
+  "rejected_operations": [
+    {"vault": "v1", "tag": "compliance", "action": "add", "reason": "attachment_already_exists"},
+    {"vault": "v2", "tag": "general-use", "action": "remove", "reason": "attachment_not_found"},
+    {"vault": "v3", "tag": "kyc-required", "action": "add", "reason": "pending_request_exists"}
+  ],
+  "removed_vaults": []
+}</pre>
+                </div>
+
+                <div class="error-example">
+                    <h5>🚧 Everything Failed (Rejections + Vault Removal)</h5>
+                    <pre class="json-response">HTTP 200 OK
+{
+  "status": "no_operations_applied",
+  "message": "No operations could be applied",
+  "applied_operations": [],
+  "pending_operations": [],
+  "rejected_operations": [
+    {"vault": "v1", "tag": "general-use", "action": "add", "reason": "attachment_already_exists"}
+  ],
+  "removed_vaults": [
+    {"vault": "v2", "reason": "capacity_exceeded", "current_attachments": 3, "attempted_additions": 1},
+    {"vault": "v3", "reason": "capacity_exceeded", "current_attachments": 3, "attempted_additions": 2}
+  ]
+}</pre>
+                </div>
+
+                <div style="background: #e8f5e8; padding: 15px; border-radius: 6px; margin-top: 20px;">
+                    <h6 style="margin: 0 0 10px 0; color: #2e7d32;">Status Meanings:</h6>
+                    <div style="font-size: 12px; color: #2e7d32;">
+                        • <strong>success:</strong> All operations completed as requested<br>
+                        • <strong>no_operations_applied:</strong> Nothing could be processed due to business rules<br>
+                        • All responses are 200 OK because the request was processed successfully
+                    </div>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-secondary" onclick="closeSuccessFailureModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Global state
         let currentAttachments = [];
@@ -1644,28 +1907,28 @@
             // Only use existing tag IDs from the tags table
             const availableTagIds = currentTags.map(tag => tag.id);
             const statuses = ['final', 'pending add', 'pending remove'];
-            
+
             // Generate 3-7 random attachments
             const numAttachments = Math.floor(Math.random() * 5) + 3;
             const usedPairs = new Set();
-            
+
             for (let i = 0; i < numAttachments; i++) {
                 let vaultId, tagId, pair;
-                
+
                 // Ensure unique vault-tag pairs
                 do {
                     vaultId = vaultIds[Math.floor(Math.random() * vaultIds.length)];
                     tagId = availableTagIds[Math.floor(Math.random() * availableTagIds.length)];
                     pair = `${vaultId}:${tagId}`;
                 } while (usedPairs.has(pair));
-                
+
                 usedPairs.add(pair);
-                
+
                 // Determine status - avoid pending states for non-protected tags
                 let status;
                 const tag = currentTags.find(t => t.id === tagId);
                 const isProtected = tag && tag.isProtected;
-                
+
                 const statusRand = Math.random();
                 if (!isProtected) {
                     // Non-protected tags should only have final status
@@ -1680,13 +1943,13 @@
                         status = 'pending remove';
                     }
                 }
-                
+
                 let reqId = null;
-                
+
                 // Add reqId for pending attachments
                 if (status.startsWith('pending')) {
                     reqId = `REQ-${String(Math.floor(Math.random() * 999) + 1).padStart(3, '0')}`;
-                    
+
                     // Add metadata for this request
                     if (!requestMetadata[reqId]) {
                         requestMetadata[reqId] = {
@@ -1697,15 +1960,15 @@
                         };
                     }
                 }
-                
+
                 attachments.push({
                     vaultId,
-                    tagId, 
+                    tagId,
                     status,
                     reqId
                 });
             }
-            
+
             return attachments;
         }
 
@@ -1999,14 +2262,14 @@
         function renderTagsTable() {
             const tbody = document.getElementById('tagsTableBody');
             tbody.innerHTML = currentTags.map((tag, index) => {
-                const reqIdCell = tag.reqId ? 
-                    `<span class="req-link" onclick="showTagRequestModal('${tag.reqId}')">${tag.reqId}</span>` : 
+                const reqIdCell = tag.reqId ?
+                    `<span class="req-link" onclick="showTagRequestModal('${tag.reqId}')">${tag.reqId}</span>` :
                     '<span style="color: #6c757d;">-</span>';
 
                 const statusBadge = `<span class="tag-status-badge ${tag.status.replace(' ', '-')}">${tag.status}</span>`;
-                
+
                 const isEditable = tag.status === 'final';
-                
+
                 return `
                 <tr>
                     <td>
@@ -2040,9 +2303,9 @@
             // Prompt for tag details
             const label = prompt("Enter tag label:");
             if (!label || label.trim() === '') return;
-            
+
             const isProtected = confirm("Is this a protected tag?\n(Protected tags require approval for attach/detach operations)");
-            
+
             // Generate unique ID
             let newId;
             do {
@@ -2066,17 +2329,17 @@
 
         function updateTag(index, field, value) {
             if (index < 0 || index >= currentTags.length) return;
-            
+
             const tag = currentTags[index];
             const oldValue = tag[field];
-            
+
             // Block isProtected changes
             if (field === 'isProtected') {
                 alert('Protection status cannot be changed after tag creation.');
                 renderTagsTable();
                 return;
             }
-            
+
             // Special validation for tag ID changes
             if (field === 'id' && oldValue !== value) {
                 // Check if old ID is used in attachments
@@ -2086,7 +2349,7 @@
                     renderTagsTable(); // Reset the input field
                     return;
                 }
-                
+
                 // Check if new ID already exists
                 const idExists = currentTags.some((t, i) => i !== index && t.id === value);
                 if (idExists) {
@@ -2095,15 +2358,15 @@
                     return;
                 }
             }
-            
+
             // If it's a protected tag being edited, create approval request
             if (tag.isProtected && tag.status === 'final' && oldValue !== value) {
                 const reqId = `TAG-REQ-${String(Date.now()).slice(-6)}`;
-                
+
                 // Create pending edit version
                 tag.status = 'pendingEdit';
                 tag.reqId = reqId;
-                
+
                 // Store metadata for approval
                 tagRequestMetadata[reqId] = {
                     tagId: tag.id,
@@ -2112,35 +2375,35 @@
                     newValue: value,
                     timestamp: new Date().toISOString()
                 };
-                
+
                 alert(`Protected tag edit requires approval. Request ${reqId} created.`);
             } else if (!tag.isProtected || tag.status !== 'final') {
                 // Direct update for non-protected tags or non-final status
                 tag[field] = value;
             }
-            
+
             renderTagsTable();
         }
 
         function deleteTag(index) {
             if (index < 0 || index >= currentTags.length) return;
-            
+
             const tag = currentTags[index];
-            
+
             // Check if tag has any attachments
             const hasAttachments = currentAttachments.some(att => att.tagId === tag.id);
             if (hasAttachments) {
                 alert(`Cannot delete tag "${tag.label}" - it has existing attachments. Remove all attachments first.`);
                 return;
             }
-            
+
             // If it's a protected tag, create approval request
             if (tag.isProtected && tag.status === 'final') {
                 const reqId = `TAG-DEL-${String(Date.now()).slice(-6)}`;
-                
+
                 tag.status = 'pendingEdit';
                 tag.reqId = reqId;
-                
+
                 tagRequestMetadata[reqId] = {
                     tagId: tag.id,
                     field: 'delete',
@@ -2148,7 +2411,7 @@
                     newValue: null,
                     timestamp: new Date().toISOString()
                 };
-                
+
                 alert(`Protected tag deletion requires approval. Request ${reqId} created.`);
                 renderTagsTable();
             } else {
@@ -2161,19 +2424,19 @@
         function showTagRequestModal(reqId) {
             const metadata = tagRequestMetadata[reqId];
             if (!metadata) return;
-            
+
             currentModalReqId = reqId;
             document.getElementById('modalTitle').textContent = `Tag Request ${reqId}`;
-            
+
             const modalBody = document.getElementById('modalBody');
             let actionDescription = '';
-            
+
             if (metadata.field === 'delete') {
                 actionDescription = `<strong>Delete Tag:</strong> "${metadata.oldValue.label}" (${metadata.oldValue.isProtected ? 'Protected' : 'Not Protected'})`;
             } else {
                 actionDescription = `<strong>Edit Tag:</strong> Change ${metadata.field} from "${metadata.oldValue}" to "${metadata.newValue}"`;
             }
-            
+
             modalBody.innerHTML = `
                 <div style="background-color: #fff3e0; padding: 15px; margin-bottom: 20px; border-radius: 6px; border-left: 4px solid #ff9800;">
                     <h4 style="margin: 0 0 10px 0; color: #ef6c00;">Tag Modification Request</h4>
@@ -2185,23 +2448,23 @@
                     </div>
                 </div>
             `;
-            
+
             document.getElementById('requestModal').style.display = 'block';
         }
 
         function approveTagRequest() {
             if (!currentModalReqId || !currentModalReqId.startsWith('TAG-')) return;
-            
+
             const reqId = currentModalReqId;
             const metadata = tagRequestMetadata[reqId];
             if (!metadata) return;
-            
+
             closeRequestModal();
-            
+
             // Find the tag
             const tagIndex = currentTags.findIndex(tag => tag.id === metadata.tagId);
             if (tagIndex === -1) return;
-            
+
             if (metadata.field === 'delete') {
                 // Delete the tag
                 currentTags.splice(tagIndex, 1);
@@ -2212,20 +2475,20 @@
                 tag.status = 'final';
                 tag.reqId = null;
             }
-            
+
             delete tagRequestMetadata[reqId];
             renderTagsTable();
         }
 
         function rejectTagRequest() {
             if (!currentModalReqId || !currentModalReqId.startsWith('TAG-')) return;
-            
+
             const reqId = currentModalReqId;
             const metadata = tagRequestMetadata[reqId];
             if (!metadata) return;
-            
+
             closeRequestModal();
-            
+
             // Find the tag and revert to final state
             const tagIndex = currentTags.findIndex(tag => tag.id === metadata.tagId);
             if (tagIndex !== -1) {
@@ -2233,7 +2496,7 @@
                 tag.status = 'final';
                 tag.reqId = null;
             }
-            
+
             delete tagRequestMetadata[reqId];
             renderTagsTable();
         }
@@ -2432,7 +2695,7 @@
                     }
                 } else if (action === 'remove') {
                     // Remove immediately
-                    newAttachments = newAttachments.filter(att => 
+                    newAttachments = newAttachments.filter(att =>
                         !(att.vaultId === vaultId && att.tagId === tagId)
                     );
                 }
@@ -2761,9 +3024,9 @@
                         return;
                     }
                 }
-                
+
                 currentAttachments[index][field] = value;
-                
+
                 // Re-render to update tooltips if tagId changed
                 if (field === 'tagId') {
                     renderAttachmentsTable();
@@ -3131,7 +3394,7 @@
         function getStep2Content() {
             return `
                 <h3>Generated Candidates</h3>
-                <p>Review the candidate pairs generated from your inputs. Conflicts (same vault/tag in both add and remove) are resolved by preferring remove operations.</p>
+                <p>Review the candidate pairs generated from your inputs.</p>
                 <div id="candidatesWizardContent">
                     <div class="empty-state">Generating candidates...</div>
                 </div>
@@ -3141,7 +3404,7 @@
         function getStep3Content() {
             return `
                 <h3>Sanitization Process</h3>
-                <p>Watch the sequential validation of each candidate pair. Failed pairs cause their entire vault to be removed from the batch.</p>
+                <p>Watch the sequential validation of each candidate pair.</p>
                 <div id="sanitizationWizardContent">
                     <div class="empty-state">Running sanitization...</div>
                 </div>
@@ -3174,7 +3437,7 @@
                 if (currentWizardStep === 1 && !validateInputs()) {
                     return; // Don't proceed if validation fails
                 }
-                
+
                 // Process current step before moving to next
                 processCurrentStep();
                 showWizardStep(currentWizardStep + 1);
@@ -3436,7 +3699,7 @@
             const removeTagsEl = document.getElementById('tagsToRemove');
 
             if (!vaultsEl || !addTagsEl || !removeTagsEl) return true;
-            
+
             // Reset validation errors
             currentValidationErrors = [];
 
@@ -3534,7 +3797,7 @@
                 const tag = currentTags.find(t => t.id === tagId);
                 return tag && tag.status === 'pendingEdit';
             });
-            
+
             const allInvalidTags = [...invalidTags, ...tagsBeingEdited];
             if (invalidTags.length > 0) {
                 addTagsEl.classList.add('invalid');
@@ -3551,13 +3814,13 @@
                 });
                 isValid = false;
             }
-            
+
             if (tagsBeingEdited.length > 0) {
                 addTagsEl.classList.add('invalid');
                 removeTagsEl.classList.add('invalid');
                 if (conflictError) {
                     const errorMsg = `Tags being edited: [${tagsBeingEdited.join(', ')}]. Complete pending tag operations first.`;
-                    conflictError.textContent = conflictError.style.display === 'block' ? 
+                    conflictError.textContent = conflictError.style.display === 'block' ?
                         conflictError.textContent + ' ' + errorMsg : errorMsg;
                     conflictError.style.display = 'block';
                 }
@@ -3667,6 +3930,138 @@
 
         resetWizard()
 
+        // Global variable to store the current API response
+        let currentApiResponse = null;
+
+        // Function to generate API response based on current operations
+        function generateApiResponse() {
+            if (!currentValidPairs || currentValidPairs.length === 0) {
+                return {
+                    status: 'no_operations_applied',
+                    message: 'No operations could be applied',
+                    applied_operations: [],
+                    pending_operations: [],
+                    rejected_operations: [],
+                    removed_vaults: []
+                };
+            }
+
+            const appliedOperations = [];
+            const pendingOperations = [];
+
+            // Process current valid pairs based on protection status
+            currentValidPairs.forEach(pair => {
+                const tag = getTagById(pair.tagId);
+                if (tag && tag.isProtected) {
+                    // Protected tags go to pending with request ID
+                    const reqId = `REQ-${String(Date.now()).slice(-6)}`;
+                    pendingOperations.push({
+                        vault: pair.vaultId,
+                        tag: pair.tagId,
+                        action: pair.action,
+                        status: 'pending',
+                        request_id: reqId
+                    });
+                } else {
+                    // Non-protected tags are applied immediately
+                    appliedOperations.push({
+                        vault: pair.vaultId,
+                        tag: pair.tagId,
+                        action: pair.action,
+                        status: 'final'
+                    });
+                }
+            });
+
+            // Add removed vaults if any
+            const removedVaults = currentRemovedVaults.map(vaultId => ({
+                vault: vaultId,
+                reason: 'capacity_exceeded',
+                current_attachments: 3, // Simplified for demo
+                attempted_additions: 1
+            }));
+
+            // Determine status and message
+            let status, message;
+            if (appliedOperations.length > 0 && pendingOperations.length > 0) {
+                status = 'partial_success';
+                message = 'Operations processed with mixed protection levels';
+            } else if (pendingOperations.length > 0 && appliedOperations.length === 0) {
+                status = 'approval_required';
+                message = 'All operations require approval';
+            } else if (appliedOperations.length > 0 && pendingOperations.length === 0) {
+                status = 'success';
+                message = 'All operations applied successfully';
+            } else {
+                status = 'no_operations_applied';
+                message = 'No operations could be applied';
+            }
+
+            return {
+                status: status,
+                message: message,
+                applied_operations: appliedOperations,
+                pending_operations: pendingOperations,
+                rejected_operations: [], // Would need more logic for actual rejections
+                removed_vaults: removedVaults
+            };
+        }
+
+        // Function to show current API response
+        function showCurrentApiResponse() {
+            if (!currentApiResponse) {
+                currentApiResponse = generateApiResponse();
+            }
+
+            const modalHtml = `
+                <div id="currentApiResponseModal" class="modal" style="display: block;">
+                    <div class="modal-content" style="max-width: 700px;">
+                        <div class="modal-header">
+                            <h3 class="modal-title">🚀 Current API Response</h3>
+                            <button class="close" onclick="closeCurrentApiResponseModal()">&times;</button>
+                        </div>
+                        <div style="padding: 20px;">
+                            <p style="margin-bottom: 15px; color: #28a745; font-size: 13px;">API would return 200 OK with this response for the current operations:</p>
+                            <pre class="json-response">HTTP 200 OK\n${JSON.stringify(currentApiResponse, null, 2)}</pre>
+                        </div>
+                        <div class="modal-buttons">
+                            <button class="btn-secondary" onclick="closeCurrentApiResponseModal()">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        function closeCurrentApiResponseModal() {
+            const modal = document.getElementById('currentApiResponseModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // Function to add API response button to any completion content
+        function addApiResponseButton(containerId) {
+            const container = document.getElementById(containerId);
+            if (container && !container.querySelector('.api-response-button')) {
+                const buttonHtml = `
+                    <div class="api-response-button" style="margin-top: 20px; text-align: center; padding-top: 15px; border-top: 1px solid #dee2e6;">
+                        <button class="btn-secondary" onclick="showCurrentApiResponse()" style="background: #e3f2fd; border: 1px solid #90caf9; color: #1565c0; padding: 8px 16px; font-size: 13px;">
+                            🚀 View API Response
+                        </button>
+                        <p style="margin: 8px 0 0 0; font-size: 11px; color: #6c757d;">See the exact API response for these operations</p>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', buttonHtml);
+            }
+        }
+
+        // Function to ensure API response is reset when operations change
+        function resetApiResponse() {
+            currentApiResponse = null;
+        }
+
         // Helper function to get tag by ID
         function getTagById(tagId) {
             return currentTags.find(tag => tag.id === tagId);
@@ -3694,16 +4089,94 @@
             modal.style.display = 'none';
         }
 
+        // Sanitization Results Modal Functions
+        function showSanitizationResultsModal() {
+            const modal = document.getElementById('sanitizationResultsModal');
+            modal.style.display = 'block';
+        }
+
+        function closeSanitizationResultsModal() {
+            const modal = document.getElementById('sanitizationResultsModal');
+            modal.style.display = 'none';
+        }
+
+        // Protection Workflows Modal Functions
+        function showProtectionWorkflowsModal() {
+            const modal = document.getElementById('protectionWorkflowsModal');
+            modal.style.display = 'block';
+        }
+
+        function closeProtectionWorkflowsModal() {
+            const modal = document.getElementById('protectionWorkflowsModal');
+            modal.style.display = 'none';
+        }
+
+        // Success & Failure Modal Functions
+        function showSuccessFailureModal() {
+            const modal = document.getElementById('successFailureModal');
+            modal.style.display = 'block';
+        }
+
+        function closeSuccessFailureModal() {
+            const modal = document.getElementById('successFailureModal');
+            modal.style.display = 'none';
+        }
+
+        // Sanitization Results Modal Functions
+        function showSanitizationResultsModal() {
+            const modal = document.getElementById('sanitizationResultsModal');
+            modal.style.display = 'block';
+        }
+
+        function closeSanitizationResultsModal() {
+            const modal = document.getElementById('sanitizationResultsModal');
+            modal.style.display = 'none';
+        }
+
+        // Protection Workflows Modal Functions
+        function showProtectionWorkflowsModal() {
+            const modal = document.getElementById('protectionWorkflowsModal');
+            modal.style.display = 'block';
+        }
+
+        function closeProtectionWorkflowsModal() {
+            const modal = document.getElementById('protectionWorkflowsModal');
+            modal.style.display = 'none';
+        }
+
+        // Success & Failure Modal Functions
+        function showSuccessFailureModal() {
+            const modal = document.getElementById('successFailureModal');
+            modal.style.display = 'block';
+        }
+
+        function closeSuccessFailureModal() {
+            const modal = document.getElementById('successFailureModal');
+            modal.style.display = 'none';
+        }
+
         // Close modals when clicking outside of them
-        window.addEventListener('click', function(event) {
+        window.addEventListener('click', function (event) {
             const behaviorModal = document.getElementById('behaviorModal');
             const validationErrorsModal = document.getElementById('validationErrorsModal');
-            
+            const sanitizationResultsModal = document.getElementById('sanitizationResultsModal');
+            const protectionWorkflowsModal = document.getElementById('protectionWorkflowsModal');
+            const successFailureModal = document.getElementById('successFailureModal');
+
             if (event.target === behaviorModal) {
                 closeBehaviorModal();
             }
             if (event.target === validationErrorsModal) {
                 closeValidationErrorsModal();
+            }
+            if (event.target === sanitizationResultsModal) {
+                closeSanitizationResultsModal();
+            }
+            if (event.target === protectionWorkflowsModal) {
+                closeProtectionWorkflowsModal();
+            }
+            if (event.target === successFailureModal) {
+                closeSuccessFailureModal();
             }
         });
 
