@@ -2009,6 +2009,36 @@
         </div>
     </div>
 
+    <!-- Add Tag Modal -->
+    <div id="addTagModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Tag</h3>
+                <button class="close" onclick="closeAddTagModal()">&times;</button>
+            </div>
+            <div style="padding: 20px;">
+                <div class="input-group">
+                    <label for="newTagLabel">Label:</label>
+                    <input type="text" id="newTagLabel" placeholder="Enter tag label">
+                    <div id="labelError" class="validation-error" style="display: none;"></div>
+                </div>
+                <div class="input-group">
+                    <label for="newTagProtected">Protected:</label>
+                    <input type="checkbox" id="newTagProtected">
+                    <span style="font-size: 12px; color: #6c757d;">Require approval for operations</span>
+                </div>
+                <div style="margin-top: 10px;">
+                    <span style="font-size: 12px; color: #6c757d;">Next available ID:</span>
+                    <span id="previewTagId" style="font-size: 12px; color: #333;"></span>
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn-primary" onclick="submitNewTag()">Add Tag</button>
+                    <button class="btn-secondary" onclick="closeAddTagModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Global state
         let currentAttachments = [];
@@ -2431,13 +2461,25 @@
         }
 
         function addTag() {
-            // Prompt for tag details
-            const label = prompt("Enter tag label:");
-            if (!label || label.trim() === '') return;
+            // Show the add tag modal
+            updateTagIdPreview();
+            clearAddTagForm();
+            document.getElementById('addTagModal').style.display = 'block';
+        }
 
-            const isProtected = confirm("Is this a protected tag?\n(Protected tags require approval for attach/detach operations)");
+        function closeAddTagModal() {
+            document.getElementById('addTagModal').style.display = 'none';
+            clearAddTagForm();
+        }
 
-            // Generate unique ID
+        function clearAddTagForm() {
+            document.getElementById('newTagLabel').value = '';
+            document.getElementById('newTagProtected').checked = false;
+            document.getElementById('labelError').style.display = 'none';
+        }
+
+        function updateTagIdPreview() {
+            // Generate preview of what the next ID will be
             let newId;
             do {
                 newId = `t${currentTags.length + 1}`;
@@ -2447,15 +2489,66 @@
                 }
             } while (currentTags.some(tag => tag.id === newId));
 
+            document.getElementById('previewTagId').textContent = newId;
+        }
+
+        function validateTagLabel(label) {
+            if (!label || label.trim() === '') {
+                return 'Label cannot be empty';
+            }
+
+            // Check for duplicate labels (case-insensitive)
+            const existingLabel = currentTags.find(tag =>
+                tag.label.toLowerCase() === label.trim().toLowerCase()
+            );
+
+            if (existingLabel) {
+                return `Label "${label.trim()}" already exists. Please choose a different label.`;
+            }
+
+            return null; // No error
+        }
+
+        function submitNewTag() {
+            const labelInput = document.getElementById('newTagLabel');
+            const protectedInput = document.getElementById('newTagProtected');
+            const errorDiv = document.getElementById('labelError');
+
+            const label = labelInput.value.trim();
+            const isProtected = protectedInput.checked;
+
+            // Validate label
+            const validationError = validateTagLabel(label);
+            if (validationError) {
+                errorDiv.textContent = validationError;
+                errorDiv.style.display = 'block';
+                labelInput.focus();
+                return;
+            }
+
+            // Hide error if validation passes
+            errorDiv.style.display = 'none';
+
+            // Generate unique ID (same logic as before)
+            let newId;
+            do {
+                newId = `t${currentTags.length + 1}`;
+                if (currentTags.some(tag => tag.id === newId)) {
+                    newId = `t${Date.now()}`;
+                }
+            } while (currentTags.some(tag => tag.id === newId));
+
             const newTag = {
                 id: newId,
-                label: label.trim(),
+                label: label,
                 isProtected: isProtected,
                 status: 'final',
                 reqId: null
             };
+
             currentTags.push(newTag);
             renderTagsTable();
+            closeAddTagModal();
         }
 
         function updateTag(index, field, value) {
