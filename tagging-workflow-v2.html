@@ -1128,19 +1128,20 @@
         let currentTags = [];
         let tagRequestMetadata = {}; // Store tag request metadata by reqId
 
-        // Initialize with random starter data
+        // Initialize with starter data
         function initializeStarterData() {
-            currentAttachments = generateRandomAttachments();
+            initializeTags(); // Initialize tags first
+            currentAttachments = generateRandomAttachments(); // Then generate attachments using existing tags
 
             renderAttachmentsTable();
             clearResults();
-            initializeTags(); // Initialize tags table
         }
 
         function generateRandomAttachments() {
             const attachments = [];
             const vaultIds = ['v1', 'v2', 'v3', 'v4', 'v5'];
-            const tagIds = ['t1', 't2', 't3', 't4', 't5', 't6', 't7', 't8', 't9', 't10'];
+            // Only use existing tag IDs from the tags table
+            const availableTagIds = currentTags.map(tag => tag.id);
             const statuses = ['final', 'pending add', 'pending remove'];
             
             // Generate 3-7 random attachments
@@ -1153,21 +1154,30 @@
                 // Ensure unique vault-tag pairs
                 do {
                     vaultId = vaultIds[Math.floor(Math.random() * vaultIds.length)];
-                    tagId = tagIds[Math.floor(Math.random() * tagIds.length)];
+                    tagId = availableTagIds[Math.floor(Math.random() * availableTagIds.length)];
                     pair = `${vaultId}:${tagId}`;
                 } while (usedPairs.has(pair));
                 
                 usedPairs.add(pair);
                 
-                // Determine status - favor final attachments (70% chance)
+                // Determine status - avoid pending states for non-protected tags
                 let status;
+                const tag = currentTags.find(t => t.id === tagId);
+                const isProtected = tag && tag.isProtected;
+                
                 const statusRand = Math.random();
-                if (statusRand < 0.7) {
+                if (!isProtected) {
+                    // Non-protected tags should only have final status
                     status = 'final';
-                } else if (statusRand < 0.85) {
-                    status = 'pending add';
                 } else {
-                    status = 'pending remove';
+                    // Protected tags can have pending states (70% final, 30% pending)
+                    if (statusRand < 0.7) {
+                        status = 'final';
+                    } else if (statusRand < 0.85) {
+                        status = 'pending add';
+                    } else {
+                        status = 'pending remove';
+                    }
                 }
                 
                 let reqId = null;
@@ -1478,11 +1488,9 @@
 
         function initializeTags() {
             currentTags = [
-                { id: 't1', label: 't1', isProtected: false, status: 'final', reqId: null },
-                { id: 't2', label: 't2', isProtected: true, status: 'final', reqId: null },
-                { id: 't3', label: 't3', isProtected: false, status: 'final', reqId: null },
-                { id: 't4', label: 't4', isProtected: true, status: 'final', reqId: null },
-                { id: 't5', label: 't5', isProtected: false, status: 'final', reqId: null }
+                { id: 't1', label: 'compliance', isProtected: true, status: 'final', reqId: null },
+                { id: 't2', label: 'kyc-required', isProtected: true, status: 'final', reqId: null },
+                { id: 't3', label: 'general-use', isProtected: false, status: 'final', reqId: null }
             ];
             renderTagsTable();
         }
@@ -1513,8 +1521,8 @@
                     </td>
                     <td class="protected-checkbox">
                         <input type="checkbox" ${tag.isProtected ? 'checked' : ''} 
-                               onchange="updateTag(${index}, 'isProtected', this.checked)"
-                               ${!isEditable ? 'disabled' : ''}>
+                               disabled 
+                               title="Protection status cannot be changed after creation">
                     </td>
                     <td>${statusBadge}</td>
                     <td>${reqIdCell}</td>
@@ -1528,6 +1536,12 @@
         }
 
         function addTag() {
+            // Prompt for tag details
+            const label = prompt("Enter tag label:");
+            if (!label || label.trim() === '') return;
+            
+            const isProtected = confirm("Is this a protected tag?\n(Protected tags require approval for attach/detach operations)");
+            
             // Generate unique ID
             let newId;
             do {
@@ -1540,8 +1554,8 @@
 
             const newTag = {
                 id: newId,
-                label: `Tag ${currentTags.length + 1}`,
-                isProtected: false,
+                label: label.trim(),
+                isProtected: isProtected,
                 status: 'final',
                 reqId: null
             };
@@ -1554,6 +1568,13 @@
             
             const tag = currentTags[index];
             const oldValue = tag[field];
+            
+            // Block isProtected changes
+            if (field === 'isProtected') {
+                alert('Protection status cannot be changed after tag creation.');
+                renderTagsTable();
+                return;
+            }
             
             // Special validation for tag ID changes
             if (field === 'id' && oldValue !== value) {
@@ -1882,43 +1903,79 @@
         function applyValidPairs(validPairs, attachments) {
             let newAttachments = [...attachments];
 
-            // Generate unique request ID for this batch
-            const reqId = `REQ-${String(Date.now()).slice(-6)}`;
-
-            // Extract the applied vaults and tags from validPairs
-            const appliedVaults = [...new Set(validPairs.map(p => p.vaultId))];
-            const appliedAddTags = [...new Set(validPairs.filter(p => p.action === 'add').map(p => p.tagId))];
-            const appliedRemoveTags = [...new Set(validPairs.filter(p => p.action === 'remove').map(p => p.tagId))];
-
-            // Store metadata for this request
-            requestMetadata[reqId] = {
-                vaults: appliedVaults,
-                tagsToAdd: appliedAddTags,
-                tagsToRemove: appliedRemoveTags,
-                timestamp: new Date().toISOString()
-            };
+            // Separate pairs by protected/non-protected tags
+            const protectedPairs = [];
+            const nonProtectedPairs = [];
 
             for (const pair of validPairs) {
+                const tag = getTagById(pair.tagId);
+                if (tag && tag.isProtected) {
+                    protectedPairs.push(pair);
+                } else {
+                    nonProtectedPairs.push(pair);
+                }
+            }
+
+            // Handle non-protected pairs immediately (sync)
+            for (const pair of nonProtectedPairs) {
                 const { vaultId, tagId, action } = pair;
 
                 if (action === 'add') {
-                    // Add new pending row only if not already present
+                    // Add immediately as final
                     const exists = newAttachments.find(att =>
                         att.vaultId === vaultId && att.tagId === tagId
                     );
 
                     if (!exists) {
-                        newAttachments.push({ vaultId, tagId, status: 'pending add', reqId });
+                        newAttachments.push({ vaultId, tagId, status: 'final', reqId: null });
                     }
                 } else if (action === 'remove') {
-                    // Update existing row status to pending remove
-                    const existingRow = newAttachments.find(att =>
-                        att.vaultId === vaultId && att.tagId === tagId
+                    // Remove immediately
+                    newAttachments = newAttachments.filter(att => 
+                        !(att.vaultId === vaultId && att.tagId === tagId)
                     );
+                }
+            }
 
-                    if (existingRow) {
-                        existingRow.status = 'pending remove';
-                        existingRow.reqId = reqId;
+            // Handle protected pairs with approval workflow (async)
+            if (protectedPairs.length > 0) {
+                const reqId = `REQ-${String(Date.now()).slice(-6)}`;
+
+                // Extract the applied vaults and tags from protected pairs only
+                const appliedVaults = [...new Set(protectedPairs.map(p => p.vaultId))];
+                const appliedAddTags = [...new Set(protectedPairs.filter(p => p.action === 'add').map(p => p.tagId))];
+                const appliedRemoveTags = [...new Set(protectedPairs.filter(p => p.action === 'remove').map(p => p.tagId))];
+
+                // Store metadata for this request
+                requestMetadata[reqId] = {
+                    vaults: appliedVaults,
+                    tagsToAdd: appliedAddTags,
+                    tagsToRemove: appliedRemoveTags,
+                    timestamp: new Date().toISOString()
+                };
+
+                for (const pair of protectedPairs) {
+                    const { vaultId, tagId, action } = pair;
+
+                    if (action === 'add') {
+                        // Add as pending add
+                        const exists = newAttachments.find(att =>
+                            att.vaultId === vaultId && att.tagId === tagId
+                        );
+
+                        if (!exists) {
+                            newAttachments.push({ vaultId, tagId, status: 'pending add', reqId });
+                        }
+                    } else if (action === 'remove') {
+                        // Update existing row status to pending remove
+                        const existingRow = newAttachments.find(att =>
+                            att.vaultId === vaultId && att.tagId === tagId
+                        );
+
+                        if (existingRow) {
+                            existingRow.status = 'pending remove';
+                            existingRow.reqId = reqId;
+                        }
                     }
                 }
             }
@@ -2597,7 +2654,7 @@
         function getStep5Content() {
             return `
                 <h3>Changes Applied</h3>
-                <p>Your changes have been applied to the attachments table. A new request has been created that you can approve or reject from the table.</p>
+                <p>Your changes have been applied to the attachments table. Protected tags require approval, while non-protected tags are applied immediately.</p>
                 <div id="applyWizardContent">
                     <div class="empty-state">Applying changes...</div>
                 </div>
@@ -2708,27 +2765,55 @@
                     const tableArea = document.querySelector('.table-area');
                     tableArea.classList.add('success-bounce');
 
-                    // Show completion message
+                    // Show completion message with protected/non-protected breakdown
                     const reqIds = [...new Set(currentAttachments.filter(att => att.reqId).map(att => att.reqId))];
                     const latestReqId = reqIds[reqIds.length - 1];
 
-                    content.innerHTML = `
-                        <div style="background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
-                            <h4 style="color: #155724; margin: 0 0 10px 0;">✅ Changes Applied Successfully</h4>
-                            <p style="color: #155724; margin: 0;">
-                                ${currentValidPairs.length} pair(s) have been applied as request <strong>${latestReqId}</strong>.
-                                Click on the request ID in the attachments table to review and approve/reject the changes.
-                            </p>
-                        </div>
-                        <div>
-                            <h4>Applied Changes:</h4>
-                            <ul>
-                                ${currentValidPairs.map(pair => `
-                                    <li>${pair.action} ${pair.tagId} ${pair.action === 'add' ? 'to' : 'from'} vault ${pair.vaultId}</li>
-                                `).join('')}
-                            </ul>
-                        </div>
-                    `;
+                    // Separate pairs by protection status
+                    const protectedPairs = currentValidPairs.filter(pair => {
+                        const tag = getTagById(pair.tagId);
+                        return tag && tag.isProtected;
+                    });
+                    const nonProtectedPairs = currentValidPairs.filter(pair => {
+                        const tag = getTagById(pair.tagId);
+                        return !tag || !tag.isProtected;
+                    });
+
+                    let protectedSection = '';
+                    if (protectedPairs.length > 0) {
+                        protectedSection = `
+                            <div style="background-color: #fff3e0; border: 1px solid #ffcc02; border-radius: 6px; padding: 15px; margin-bottom: 15px;">
+                                <h4 style="color: #ef6c00; margin: 0 0 10px 0;">🔒 Protected Tag Operations (Require Approval)</h4>
+                                <p style="color: #ef6c00; margin: 0;">
+                                    ${protectedPairs.length} operation(s) with protected tags created request <strong>${latestReqId}</strong>.
+                                </p>
+                                <ul style="margin: 10px 0;">
+                                    ${protectedPairs.map(pair => `
+                                        <li>${pair.action} ${pair.tagId} ${pair.action === 'add' ? 'to' : 'from'} vault ${pair.vaultId}</li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        `;
+                    }
+
+                    let nonProtectedSection = '';
+                    if (nonProtectedPairs.length > 0) {
+                        nonProtectedSection = `
+                            <div style="background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 6px; padding: 15px; margin-bottom: 15px;">
+                                <h4 style="color: #155724; margin: 0 0 10px 0;">⚡ Non-Protected Tag Operations (Applied Immediately)</h4>
+                                <p style="color: #155724; margin: 0;">
+                                    ${nonProtectedPairs.length} operation(s) with non-protected tags applied directly.
+                                </p>
+                                <ul style="margin: 10px 0;">
+                                    ${nonProtectedPairs.map(pair => `
+                                        <li>${pair.action} ${pair.tagId} ${pair.action === 'add' ? 'to' : 'from'} vault ${pair.vaultId}</li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        `;
+                    }
+
+                    content.innerHTML = protectedSection + nonProtectedSection;
 
                     // Clean up animations
                     setTimeout(() => {
@@ -2842,6 +2927,7 @@
 
             if (!vaultsEl || !addTagsEl || !removeTagsEl) return true;
 
+
             const vaults = parseList(vaultsEl.value);
             const addTags = parseList(addTagsEl.value);
             const removeTags = parseList(removeTagsEl.value);
@@ -2887,6 +2973,33 @@
                 removeTagsEl.classList.add('invalid');
                 if (conflictError) {
                     conflictError.textContent = `Tags appear in both add and remove: [${conflicts.join(', ')}]. A tag cannot be both added and removed.`;
+                    conflictError.style.display = 'block';
+                }
+                isValid = false;
+            }
+
+            // Validate all tags exist in the tags table and are not being edited
+            const allInputTags = [...addTags, ...removeTags];
+            const invalidTags = allInputTags.filter(tagId => !currentTags.some(tag => tag.id === tagId));
+            const tagsBeingEdited = allInputTags.filter(tagId => {
+                const tag = currentTags.find(t => t.id === tagId);
+                return tag && tag.status === 'pendingEdit';
+            });
+            
+            const allInvalidTags = [...invalidTags, ...tagsBeingEdited];
+            if (allInvalidTags.length > 0) {
+                addTagsEl.classList.add('invalid');
+                removeTagsEl.classList.add('invalid');
+                if (conflictError) {
+                    let errorMsg = '';
+                    if (invalidTags.length > 0) {
+                        errorMsg += `Invalid tag IDs: [${invalidTags.join(', ')}]. These tags do not exist. Create them in the Tags table first.`;
+                    }
+                    if (tagsBeingEdited.length > 0) {
+                        if (errorMsg) errorMsg += ' ';
+                        errorMsg += `Tags being edited: [${tagsBeingEdited.join(', ')}]. Complete pending tag operations first.`;
+                    }
+                    conflictError.textContent = errorMsg;
                     conflictError.style.display = 'block';
                 }
                 isValid = false;
