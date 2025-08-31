@@ -2827,8 +2827,17 @@
                     );
                     
                     if (conflictingTag) {
-                        // Conflict detected - this approval wins, alert user
-                        alert(`Label conflict detected! This request wins. Label "${metadata.newValue}" was already taken by another tag, but this approval takes priority.`);
+                        // Conflict detected - this approval fails, first approval already won
+                        alert(`Approval failed! Label "${metadata.newValue}" is already taken by another tag. The first approval for this label already won.`);
+                        
+                        // Reset the tag to final status but keep original label
+                        const tag = currentTags[tagIndex];
+                        tag.status = 'final';
+                        tag.reqId = null;
+                        
+                        delete tagRequestMetadata[reqId];
+                        renderTagsTable();
+                        return;
                     }
                 }
                 
