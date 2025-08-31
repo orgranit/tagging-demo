@@ -1314,6 +1314,83 @@
 
             <div class="table-area">
                 <h2>Attachments Table</h2>
+
+                <!-- Attachments Table Rules Section -->
+                <div class="table-rules-section"
+                    style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
+                    <div class="rules-header" onclick="toggleAttachmentsRules()"
+                        style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; color: #495057;">
+                        <span id="attachmentsRulesToggle">▶</span>
+                        <span>📎 Attachments Table Rules & Examples</span>
+                        <span style="font-size: 12px; color: #6c757d; font-weight: normal;">(Click to
+                            expand/collapse)</span>
+                    </div>
+
+                    <div id="attachmentsRulesContent" style="margin-top: 15px; display: none;">
+                        <div class="rules-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="rules-column">
+                                <h4 style="color: #28a745; margin: 0 0 10px 0;">✅ Capacity Rules</h4>
+                                <ul style="margin: 0; padding-left: 20px; font-size: 13px;">
+                                    <li>Maximum 3 <strong>final</strong> attachments per vault</li>
+                                    <li>Pending attachments count toward limit</li>
+                                    <li>Exceeding capacity removes entire vault from processing</li>
+                                </ul>
+
+                                <h4 style="color: #dc3545; margin: 20px 0 10px 0;">❌ Operation Constraints</h4>
+                                <ul style="margin: 0; padding-left: 20px; font-size: 13px;">
+                                    <li>Cannot add if attachment already exists as final</li>
+                                    <li>Cannot add if pending request exists for same pair</li>
+                                    <li>Cannot remove non-existent attachments</li>
+                                    <li>Cannot remove if pending request exists</li>
+                                    <li>Cannot process invalid/pending-edit tags</li>
+                                </ul>
+                            </div>
+
+                            <div class="rules-column">
+                                <h4 style="color: #0066cc; margin: 0 0 10px 0;">📝 Examples</h4>
+                                <div class="example-case"
+                                    style="margin-bottom: 12px; padding: 8px; background: #e7f3ff; border-radius: 4px;">
+                                    <div style="font-weight: 600; font-size: 12px; color: #0066cc;">Capacity Exceeded:
+                                    </div>
+                                    <div style="font-size: 12px; color: #333;">Vault v1: 2 final + 1 pending, trying to
+                                        add 2 more → <span style="color: #dc3545; font-weight: 600;">entire vault
+                                            removed</span></div>
+                                </div>
+
+                                <div class="example-case"
+                                    style="margin-bottom: 12px; padding: 8px; background: #fff3cd; border-radius: 4px;">
+                                    <div style="font-weight: 600; font-size: 12px; color: #856404;">Already Exists:
+                                    </div>
+                                    <div style="font-size: 12px; color: #333;">Add t1 to v1, but v1-t1 is final → <span
+                                            style="color: #dc3545; font-weight: 600;">operation rejected</span></div>
+                                </div>
+
+                                <div class="example-case"
+                                    style="margin-bottom: 12px; padding: 8px; background: #d4edda; border-radius: 4px;">
+                                    <div style="font-weight: 600; font-size: 12px; color: #155724;">Protected vs
+                                        Non-Protected:</div>
+                                    <div style="font-size: 12px; color: #333;">Add compliance tag → <span
+                                            style="color: #ffc107; font-weight: 600;">pending</span>, Add general tag →
+                                        <span style="color: #28a745; font-weight: 600;">final</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6;">
+                            <h4 style="color: #6f42c1; margin: 0 0 10px 0;">🎭 Status Guide</h4>
+                            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                                <div><span class="status-badge final" style="font-size: 11px;">final</span> = Confirmed
+                                    attachment</div>
+                                <div><span class="status-badge pending-add" style="font-size: 11px;">pending add</span>
+                                    = Awaiting approval to attach</div>
+                                <div><span class="status-badge pending-remove" style="font-size: 11px;">pending
+                                        remove</span> = Awaiting approval to detach</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="attachmentsTableContainer">
                     <table class="attachments-table">
                         <thead>
@@ -1346,6 +1423,112 @@
 
                 <div class="tags-section">
                     <h2>Tags Management</h2>
+
+                    <!-- Tags Table Rules Section -->
+                    <div class="table-rules-section"
+                        style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; padding: 15px; margin-bottom: 20px;">
+                        <div class="rules-header" onclick="toggleTagsRules()"
+                            style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; color: #495057;">
+                            <span id="tagsRulesToggle">▶</span>
+                            <span>🏷️ Tags Table Rules & Examples</span>
+                            <span style="font-size: 12px; color: #6c757d; font-weight: normal;">(Click to
+                                expand/collapse)</span>
+                        </div>
+
+                        <div id="tagsRulesContent" style="margin-top: 15px; display: none;">
+                            <div class="rules-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div class="rules-column">
+                                    <h4 style="color: #6f42c1; margin: 0 0 10px 0;">🔒 Protection Workflow</h4>
+                                    <ul style="margin: 0; padding-left: 20px; font-size: 13px;">
+                                        <li><strong>Protected tags:</strong> require approval for attach/detach
+                                            operations</li>
+                                        <li><strong>Non-protected tags:</strong> apply operations immediately</li>
+                                        <li>Protection status cannot be changed after creation</li>
+                                        <li>Tag edits on protected tags require approval</li>
+                                    </ul>
+
+                                    <h4 style="color: #dc3545; margin: 20px 0 10px 0;">⚠️ Validation Rules</h4>
+                                    <ul style="margin: 0; padding-left: 20px; font-size: 13px;">
+                                        <li>Tag IDs must be unique and case-sensitive</li>
+                                        <li>Cannot delete tags with existing attachments (includes pending
+                                            attach/detach)</li>
+                                        <li>Tags with "pending edit" status cannot be used in attach/detach</li>
+                                        <li>Tags with pending attachment operations cannot be deleted</li>
+                                        <li>All input arrays must reference existing valid tags</li>
+                                    </ul>
+                                </div>
+
+                                <div class="rules-column">
+                                    <h4 style="color: #0066cc; margin: 0 0 10px 0;">📝 Examples</h4>
+                                    <div class="example-case"
+                                        style="margin-bottom: 12px; padding: 8px; background: #e7f3ff; border-radius: 4px;">
+                                        <div style="font-weight: 600; font-size: 12px; color: #0066cc;">Creating
+                                            Protected Tag:</div>
+                                        <div style="font-size: 12px; color: #333;">Add tag "compliance" as protected →
+                                            operations with this tag will require approval workflow</div>
+                                    </div>
+
+                                    <div class="example-case"
+                                        style="margin-bottom: 12px; padding: 8px; background: #fff3cd; border-radius: 4px;">
+                                        <div style="font-weight: 600; font-size: 12px; color: #856404;">Tag Deletion
+                                            Blocked:</div>
+                                        <div style="font-size: 12px; color: #333;">Try to delete tag "t1" but
+                                            attachments exist → <span style="color: #dc3545; font-weight: 600;">deletion
+                                                rejected</span></div>
+                                    </div>
+
+                                    <div class="example-case"
+                                        style="margin-bottom: 12px; padding: 8px; background: #d4edda; border-radius: 4px;">
+                                        <div style="font-weight: 600; font-size: 12px; color: #155724;">Tag Edit
+                                            Workflow:</div>
+                                        <div style="font-size: 12px; color: #333;">Edit protected tag label → creates
+                                            approval request → status becomes "pending edit"</div>
+                                    </div>
+
+                                    <div class="example-case"
+                                        style="margin-bottom: 12px; padding: 8px; background: #f8d7da; border-radius: 4px;">
+                                        <div style="font-weight: 600; font-size: 12px; color: #721c24;">Pending
+                                            Attachments Block:</div>
+                                        <div style="font-size: 12px; color: #333;">Try to use tag "t1" in operation, but
+                                            t1 has pending attachment → <span
+                                                style="color: #dc3545; font-weight: 600;">operation rejected</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6;">
+                                <h4 style="color: #6f42c1; margin: 0 0 10px 0;">🎭 Status Guide</h4>
+                                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                                    <div><span class="status-badge final" style="font-size: 11px;">final</span> = Tag
+                                        ready for use</div>
+                                    <div><span class="status-badge pending-edit" style="font-size: 11px;">pending
+                                            edit</span> = Tag modification awaiting approval</div>
+                                    <div><span class="status-badge pending-remove" style="font-size: 11px;">pending
+                                            delete</span> = Tag deletion awaiting approval</div>
+                                </div>
+
+                                <div style="margin-top: 10px;">
+                                    <h5 style="color: #28a745; margin: 0 0 5px 0;">🔒 Protection Examples:</h5>
+                                    <div style="font-size: 12px; color: #666;">
+                                        <span
+                                            style="background: #fff3e0; padding: 2px 6px; border-radius: 3px; margin-right: 8px;">compliance</span>
+                                        <span
+                                            style="background: #fff3e0; padding: 2px 6px; border-radius: 3px; margin-right: 8px;">kyc-required</span>
+                                        <span style="color: #ef6c00;">← Protected tags</span>
+                                    </div>
+                                    <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                                        <span
+                                            style="background: #e8f5e8; padding: 2px 6px; border-radius: 3px; margin-right: 8px;">general-use</span>
+                                        <span
+                                            style="background: #e8f5e8; padding: 2px 6px; border-radius: 3px; margin-right: 8px;">category-a</span>
+                                        <span style="color: #28a745;">← Non-protected tags</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div id="tagsTableContainer">
                         <table class="tags-table">
                             <thead>
@@ -1395,15 +1578,20 @@
             </div>
             <div class="behavior-modal-body">
                 <div class="behavior-section-content">
+                    <h4>🎯 System Overview</h4>
+                    <div class="overview-section">
+                        <p>The tagging system manages vault-tag attachments with validation, approval workflows, and
+                            capacity constraints. Operations are processed through a multi-step wizard that validates
+                            inputs, sanitizes candidates, and applies changes based on tag protection levels.</p>
+                    </div>
 
-                    <h4>🔒 Protection-Based Workflows</h4>
+                    <h4>🔒 Tag Protection Types</h4>
                     <div class="protection-comparison">
                         <div class="protection-type protected">
                             <h5>🔒 Protected Tags</h5>
                             <div class="protection-features">
-                                <div class="feature">• Require approval for attach/detach</div>
+                                <div class="feature">• Require approval for operations</div>
                                 <div class="feature">• Create pending requests</div>
-                                <div class="feature">• Modal-based approval workflow</div>
                                 <div class="feature">• Examples: compliance, kyc-required</div>
                             </div>
                         </div>
@@ -1412,86 +1600,12 @@
                             <div class="protection-features">
                                 <div class="feature">• Apply immediately</div>
                                 <div class="feature">• No approval needed</div>
-                                <div class="feature">• Direct final state</div>
                                 <div class="feature">• Examples: general-use</div>
                             </div>
                         </div>
                     </div>
 
-                    <h4>🚫 Sanitization Rules</h4>
-                    <div class="vault-removal-rules">
-                        <div class="rule-item valid">
-                            <div class="rule-icon">✅</div>
-                            <div class="rule-content">
-                                <strong>Vault Removed from Processing:</strong> Only when capacity would be exceeded (>3
-                                attachments per vault)
-                            </div>
-                        </div>
-                        <div class="rule-item invalid">
-                            <div class="rule-icon">❌</div>
-                            <div class="rule-content">
-                                <strong>Individual Operations Rejected:</strong>
-                                <ul style="margin: 5px 0; padding-left: 20px;">
-                                    <li>Cannot add: attachment already exists as final</li>
-                                    <li>Cannot add: pending request already exists for same vault-tag pair</li>
-                                    <li>Cannot remove: attachment does not exist</li>
-                                    <li>Cannot remove: pending request already exists for same vault-tag pair</li>
-                                    <li>Cannot process: tag does not exist or is being edited</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h4>⚙️ Input Validation Rules</h4>
-                    <div class="validation-rules">
-                        <div class="validation-category">
-                            <h5>Array Constraints</h5>
-                            <div class="validation-item">• Maximum 3 tags per add array</div>
-                            <div class="validation-item">• Maximum 3 tags per remove array</div>
-                            <div class="validation-item">• No duplicate tags within arrays</div>
-                            <div class="validation-item">• No tag can appear in both add and remove arrays</div>
-                        </div>
-                        <div class="validation-category">
-                            <h5>Tag Existence</h5>
-                            <div class="validation-item">• All referenced tags must exist in tags table</div>
-                            <div class="validation-item">• Tags with 'pending edit' status are invalid</div>
-                            <div class="validation-item">• Tags being deleted are invalid</div>
-                            <div class="validation-item">• Case-sensitive tag ID matching</div>
-                        </div>
-                    </div>
-
-                    <h4>📎 Capacity Rules</h4>
-                    <div class="validation-rules">
-                        <div class="validation-category">
-                            <h5>Vault Limits</h5>
-                            <div class="validation-item">• Maximum 3 final attachments per vault</div>
-                            <div class="validation-item">• Pending attachments count toward limit</div>
-                            <div class="validation-item">• Exceeding capacity removes entire vault from processing</div>
-                            <div class="validation-item">• Vault removal affects all tag operations for that vault</div>
-                        </div>
-                        <div class="validation-category">
-                            <h5>Examples</h5>
-                            <div class="example-case">
-                                <div class="example-scenario">Capacity Exceeded:</div>
-                                <div class="example-details">Vault v1 has 2 final + 1 pending → trying to add 2 more →
-                                    <span class="fail">entire vault removed</span>
-                                </div>
-                            </div>
-                            <div class="example-case">
-                                <div class="example-scenario">Already Exists:</div>
-                                <div class="example-details">Add t1 to v1, but v1-t1 already final → <span
-                                        class="fail">operation rejected</span></div>
-                            </div>
-                            <div class="example-case">
-                                <div class="example-scenario">Protected Tag:</div>
-                                <div class="example-details">Add compliance tag → <span class="pending">creates pending
-                                        request</span>, Add general-use tag → <span class="success">applied
-                                        immediately</span></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h4>🎭 Status Indicators</h4>
+                    <h4>🎭 Status Types</h4>
                     <div class="status-legend">
                         <div class="status-item">
                             <span class="status-badge final">final</span>
@@ -1509,6 +1623,17 @@
                             <span class="status-badge pending-edit">pending edit</span>
                             <span>Tag being modified</span>
                         </div>
+                    </div>
+
+                    <h4>📋 Detailed Rules</h4>
+                    <div class="detailed-rules-section">
+                        <p>For specific rules and examples:</p>
+                        <ul>
+                            <li><strong>Attachments Table:</strong> See rules section above the table for capacity
+                                limits, status constraints, and operation examples</li>
+                            <li><strong>Tags Table:</strong> See rules section above the table for protection workflows,
+                                tag management, and validation requirements</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -1592,7 +1717,6 @@
   ]
 }</pre>
                 </div>
-
                 <div class="error-example">
                     <h5>⚔️ Conflicting Arrays</h5>
                     <pre class="json-response">{
@@ -2632,7 +2756,7 @@
                     });
                 } else {
                     // Log the failure and add to removed pairs
-                    removedPairs.push({...candidate, reason});
+                    removedPairs.push({ ...candidate, reason });
                     log.push({
                         step: i + 1,
                         candidate: candidate,
@@ -3746,7 +3870,7 @@
             } else {
                 validPairsHtml = '<h4>Valid Pairs</h4><div class="empty-state">No valid pairs</div>';
             }
-            
+
             let removedPairsHtml = '';
             if (currentRemovedPairs.length > 0) {
                 removedPairsHtml = `
@@ -3890,7 +4014,11 @@
                 return tag && tag.status === 'pendingEdit';
             });
 
-            const allInvalidTags = [...invalidTags, ...tagsBeingEdited];
+            const tagsWithPendingAttachments = allInputTags.filter(tagId => {
+                return currentAttachments.some(att => att.tagId === tagId && att.status.startsWith('pending'));
+            });
+
+            const allInvalidTags = [...invalidTags, ...tagsBeingEdited, ...tagsWithPendingAttachments];
             if (invalidTags.length > 0) {
                 addTagsEl.classList.add('invalid');
                 removeTagsEl.classList.add('invalid');
@@ -4030,7 +4158,7 @@
             const appliedOperations = [];
             const pendingOperations = [];
             const rejectedOperations = [];
-            
+
             // Process valid pairs based on protection status
             if (currentValidPairs && currentValidPairs.length > 0) {
                 currentValidPairs.forEach(pair => {
@@ -4085,7 +4213,7 @@
             // Determine status and message based on all operations
             let status, message;
             const totalOperations = appliedOperations.length + pendingOperations.length + rejectedOperations.length;
-            
+
             if (totalOperations === 0) {
                 status = 'no_operations_requested';
                 message = 'No operations were requested';
@@ -4139,7 +4267,7 @@
             if (!currentApiResponse) {
                 currentApiResponse = generateApiResponse();
             }
-            
+
             const originalApiCall = generateOriginalApiCall();
 
             const modalHtml = `
@@ -4156,9 +4284,9 @@
                                 <pre class="json-response" style="background-color: #f8f9fa; border-left: 4px solid #0066cc;">${originalApiCall.method} ${originalApiCall.url}
 
 ${JSON.stringify({
-    headers: originalApiCall.headers,
-    body: originalApiCall.body
-}, null, 2)}</pre>
+                headers: originalApiCall.headers,
+                body: originalApiCall.body
+            }, null, 2)}</pre>
                             </div>
                             
                             <div>
@@ -4220,7 +4348,7 @@ ${JSON.stringify(currentApiResponse, null, 2)}</pre>
             const vaults = new Set();
             const addTags = new Set();
             const removeTags = new Set();
-            
+
             // Get the original input data from candidates
             if (currentCandidates && currentCandidates.length > 0) {
                 currentCandidates.forEach(candidate => {
@@ -4232,7 +4360,7 @@ ${JSON.stringify(currentApiResponse, null, 2)}</pre>
                     }
                 });
             }
-            
+
             // Create the API call object with the 3 arrays
             const apiCall = {
                 method: 'POST',
@@ -4247,7 +4375,7 @@ ${JSON.stringify(currentApiResponse, null, 2)}</pre>
                     tags_to_remove: Array.from(removeTags)
                 }
             };
-            
+
             return apiCall;
         }
 
@@ -4265,6 +4393,31 @@ ${JSON.stringify(currentApiResponse, null, 2)}</pre>
         function closeBehaviorModal() {
             const modal = document.getElementById('behaviorModal');
             modal.style.display = 'none';
+        }
+
+        // Rules Toggle Functions
+        function toggleAttachmentsRules() {
+            const content = document.getElementById('attachmentsRulesContent');
+            const toggle = document.getElementById('attachmentsRulesToggle');
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                toggle.textContent = '▼';
+            } else {
+                content.style.display = 'none';
+                toggle.textContent = '▶';
+            }
+        }
+
+        function toggleTagsRules() {
+            const content = document.getElementById('tagsRulesContent');
+            const toggle = document.getElementById('tagsRulesToggle');
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                toggle.textContent = '▼';
+            } else {
+                content.style.display = 'none';
+                toggle.textContent = '▶';
+            }
         }
 
         // Validation Errors Modal Functions
