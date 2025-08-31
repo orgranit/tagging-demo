@@ -2062,6 +2062,7 @@
             currentAttachments = generateRandomAttachments(); // Then generate attachments using existing tags
 
             renderAttachmentsTable();
+            renderTagsTable(); // Render tags table after initialization
             clearResults();
         }
 
@@ -2432,14 +2433,23 @@
 
                 const statusBadge = `<span class="tag-status-badge ${tag.status.replace(' ', '-')}">${tag.status}</span>`;
 
-                const isEditable = tag.status === 'final';
+                // Check if tag has pending attach/detach operations (only relevant for protected tags)
+                const hasPendingOperations = tag.isProtected && currentAttachments.some(att =>
+                    att.tagId === tag.id && att.status.startsWith('pending')
+                );
+
+                const isEditable = tag.status === 'final' && !hasPendingOperations;
+                
+                // Add title for disabled input to explain why it's disabled
+                const disabledTitle = hasPendingOperations ?
+                    'Label cannot be edited while tag has pending attach/detach operations' : '';
 
                 return `
                 <tr>
                     <td>
                         <span style="font-family: monospace; font-weight: 600; font-size: 12px; color: #333;">${tag.id}</span>
                     </td>
-                    <td>
+                    <td ${disabledTitle ? `title="${disabledTitle}"` : ''}>
                         <input type="text" value="${tag.label}" 
                                onchange="updateTag(${index}, 'label', this.value)"
                                ${!isEditable ? 'disabled' : ''}>
@@ -3251,6 +3261,7 @@
                     if (!tagExists && value.trim() !== '') {
                         alert(`Tag ID "${value}" does not exist. Please create the tag first or use an existing tag ID.`);
                         renderAttachmentsTable(); // Reset the input field
+                        renderTagsTable(); // Update tags table
                         return;
                     }
                 }
@@ -3261,6 +3272,7 @@
                 if (field === 'tagId') {
                     renderAttachmentsTable();
                 }
+                renderTagsTable(); // Update tags table when attachments change
             }
         }
 
@@ -3273,17 +3285,20 @@
 
                 currentAttachments[index].status = statuses[nextIndex];
                 renderAttachmentsTable();
+                renderTagsTable(); // Update tags table when attachment status changes
             }
         }
 
         function removeAttachment(index) {
             currentAttachments.splice(index, 1);
             renderAttachmentsTable();
+            renderTagsTable(); // Update tags table when attachments are removed
         }
 
         function addAttachmentRow() {
             currentAttachments.push({ vaultId: '', tagId: '', status: 'final', reqId: null });
             renderAttachmentsTable();
+            renderTagsTable(); // Update tags table when attachments are added
         }
 
         // Modal functions
