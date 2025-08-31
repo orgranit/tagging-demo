@@ -3537,6 +3537,7 @@
             });
 
             renderAttachmentsTable();
+            renderTagsTable(); // Update tags table after approval
             renderUpdatedAttachments(currentAttachments);
 
             // Animate rows based on their specific changes
@@ -3631,6 +3632,7 @@
             console.log('Attachments after reject:', currentAttachments);
 
             renderAttachmentsTable();
+            renderTagsTable(); // Update tags table after rejection
             renderUpdatedAttachments(currentAttachments);
 
             // Animate rows based on their specific changes
@@ -3915,6 +3917,7 @@
                 if (currentValidPairs.length > 0) {
                     currentAttachments = applyValidPairs(currentValidPairs, currentAttachments);
                     renderAttachmentsTable();
+                    renderTagsTable(); // Update tags table after apply finishes
 
                     // Add success animation to table area
                     const tableArea = document.querySelector('.table-area');
