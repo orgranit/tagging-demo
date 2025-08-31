@@ -2407,10 +2407,7 @@
                 return `
                 <tr>
                     <td>
-                        <input type="text" value="${tag.id}" 
-                               onchange="updateTag(${index}, 'id', this.value)"
-                               ${!isEditable ? 'disabled' : ''} 
-                               style="font-family: monospace; font-weight: 600;">
+                        <span style="font-family: monospace; font-weight: 600; font-size: 12px; color: #333;">${tag.id}</span>
                     </td>
                     <td>
                         <input type="text" value="${tag.label}" 
@@ -3012,7 +3009,7 @@
                 return `
                 <tr class="${rowClass}">
                     <td><input type="text" value="${att.vaultId}" onchange="updateAttachment(${index}, 'vaultId', this.value)"></td>
-                    <td><input type="text" value="${att.tagId}" onchange="updateAttachment(${index}, 'tagId', this.value)" title="${tagTooltip}" style="font-family: monospace;"></td>
+                    <td><span style="font-family: monospace; font-weight: 600; font-size: 12px; color: #333;">${att.tagId}</span></td>
                     <td>${statusBadge}</td>
                     <td>${reqIdCell}</td>
                     <td><button class="btn-secondary" style="font-size: 11px; padding: 2px 6px;" onclick="removeAttachment(${index})">Remove</button></td>
@@ -3744,19 +3741,7 @@
 
                     let removedVaultsSection = '';
                     if (currentRemovedVaults.length > 0) {
-                        removedVaultsSection = `
-                            <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px; padding: 15px; margin-bottom: 15px;">
-                                <h4 style="color: #856404; margin: 0 0 10px 0;">⚠️ Removed Vaults</h4>
-                                <p style="color: #856404; margin: 0;">
-                                    ${currentRemovedVaults.length} vault(s) were removed due to capacity constraints.
-                                </p>
-                                <ul style="margin: 10px 0;">
-                                    ${currentRemovedVaults.map(vaultId => `
-                                        <li>Vault ${vaultId} - capacity exceeded (max 3 attachments)</li>
-                                    `).join('')}
-                                </ul>
-                            </div>
-                        `;
+                        removedVaultsSection = `<div class="removed-vaults" style="margin-top: 20px;">Removed vaults: ${currentRemovedVaults.join(', ')}</div>`;
                     }
 
                     let apiResponseButton = `
