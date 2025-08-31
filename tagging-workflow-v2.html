@@ -255,6 +255,15 @@
             color: #856404;
         }
 
+        .removed-pair {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .removed-pair td {
+            border-color: #f5c6cb;
+        }
+
         .add-row-btn {
             background-color: #17a2b8;
             color: white;
@@ -1881,6 +1890,7 @@
         let currentAttachments = [];
         let currentCandidates = [];
         let currentValidPairs = [];
+        let currentRemovedPairs = [];
         let currentRemovedVaults = [];
         let currentSanitizationLog = [];
         let currentModalReqId = null;
@@ -2547,6 +2557,7 @@
         function sanitizeCandidates(candidates, attachments) {
             const removedVaults = new Set();
             const validPairs = [];
+            const removedPairs = [];
             const validPairCount = new Map();
             const log = [];
 
@@ -2620,7 +2631,8 @@
                         reason: 'accepted'
                     });
                 } else {
-                    // Log the failure
+                    // Log the failure and add to removed pairs
+                    removedPairs.push({...candidate, reason});
                     log.push({
                         step: i + 1,
                         candidate: candidate,
@@ -2658,6 +2670,7 @@
 
             return {
                 validPairs: validPairs,
+                removedPairs: removedPairs,
                 removedVaults: Array.from(removedVaults),
                 log: log
             };
@@ -2945,6 +2958,7 @@
 
             // Clear later steps
             currentValidPairs = [];
+            currentRemovedPairs = [];
             currentRemovedVaults = [];
             currentSanitizationLog = [];
             renderSanitizationLog([]);
@@ -2965,6 +2979,7 @@
 
             const result = sanitizeCandidates(currentCandidates, currentAttachments);
             currentValidPairs = result.validPairs;
+            currentRemovedPairs = result.removedPairs;
             currentRemovedVaults = result.removedVaults;
             currentSanitizationLog = result.log;
 
@@ -3002,6 +3017,7 @@
         function clearResults() {
             currentCandidates = [];
             currentValidPairs = [];
+            currentRemovedPairs = [];
             currentRemovedVaults = [];
             currentSanitizationLog = [];
 
@@ -3457,6 +3473,7 @@
             // Reset all data
             currentCandidates = [];
             currentValidPairs = [];
+            currentRemovedPairs = [];
             currentRemovedVaults = [];
             currentSanitizationLog = [];
 
@@ -3506,6 +3523,7 @@
         function runSanitizationInWizard() {
             const result = sanitizeCandidates(currentCandidates, currentAttachments);
             currentValidPairs = result.validPairs;
+            currentRemovedPairs = result.removedPairs;
             currentRemovedVaults = result.removedVaults;
             currentSanitizationLog = result.log;
         }
@@ -3583,7 +3601,54 @@
                         `;
                     }
 
-                    content.innerHTML = protectedSection + nonProtectedSection;
+                    let removedPairsSection = '';
+                    if (currentRemovedPairs.length > 0) {
+                        removedPairsSection = `
+                            <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 6px; padding: 15px; margin-bottom: 15px;">
+                                <h4 style="color: #721c24; margin: 0 0 10px 0;">❌ Removed Pairs</h4>
+                                <p style="color: #721c24; margin: 0;">
+                                    ${currentRemovedPairs.length} pair(s) were rejected during processing.
+                                </p>
+                                <ul style="margin: 10px 0;">
+                                    ${currentRemovedPairs.map(pair => `
+                                        <li>${pair.action} ${pair.tagId} ${pair.action === 'add' ? 'to' : 'from'} vault ${pair.vaultId} - ${pair.reason}</li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        `;
+                    }
+
+                    let removedVaultsSection = '';
+                    if (currentRemovedVaults.length > 0) {
+                        removedVaultsSection = `
+                            <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px; padding: 15px; margin-bottom: 15px;">
+                                <h4 style="color: #856404; margin: 0 0 10px 0;">⚠️ Removed Vaults</h4>
+                                <p style="color: #856404; margin: 0;">
+                                    ${currentRemovedVaults.length} vault(s) were removed due to capacity constraints.
+                                </p>
+                                <ul style="margin: 10px 0;">
+                                    ${currentRemovedVaults.map(vaultId => `
+                                        <li>Vault ${vaultId} - capacity exceeded (max 3 attachments)</li>
+                                    `).join('')}
+                                </ul>
+                            </div>
+                        `;
+                    }
+
+                    let apiResponseButton = `
+                        <div style="text-align: center; margin-top: 20px;">
+                            <button 
+                                onclick="showApiResponseFromWizard()" 
+                                style="background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 14px;"
+                                onmouseover="this.style.backgroundColor='#0056b3'" 
+                                onmouseout="this.style.backgroundColor='#007bff'"
+                            >
+                                View API Response
+                            </button>
+                        </div>
+                    `;
+
+                    content.innerHTML = protectedSection + nonProtectedSection + removedPairsSection + removedVaultsSection + apiResponseButton;
 
                     // Clean up animations
                     setTimeout(() => {
@@ -3681,13 +3746,40 @@
             } else {
                 validPairsHtml = '<h4>Valid Pairs</h4><div class="empty-state">No valid pairs</div>';
             }
+            
+            let removedPairsHtml = '';
+            if (currentRemovedPairs.length > 0) {
+                removedPairsHtml = `
+                    <h4 style="margin-top: 20px;">Removed Pairs (${currentRemovedPairs.length})</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Vault ID</th>
+                                <th>Tag ID</th>
+                                <th>Action</th>
+                                <th>Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${currentRemovedPairs.map(p => `
+                                <tr class="removed-pair">
+                                    <td>${p.vaultId}</td>
+                                    <td>${p.tagId}</td>
+                                    <td>${p.action}</td>
+                                    <td>${p.reason}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
 
             let removedVaultsHtml = '';
             if (currentRemovedVaults.length > 0) {
                 removedVaultsHtml = `<div class="removed-vaults" style="margin-top: 20px;">Removed vaults: ${currentRemovedVaults.join(', ')}</div>`;
             }
 
-            container.innerHTML = validPairsHtml + removedVaultsHtml;
+            container.innerHTML = validPairsHtml + removedPairsHtml + removedVaultsHtml;
         }
 
         // Global validation state for API response
@@ -3935,76 +4027,111 @@
 
         // Function to generate API response based on current operations
         function generateApiResponse() {
-            if (!currentValidPairs || currentValidPairs.length === 0) {
-                return {
-                    status: 'no_operations_applied',
-                    message: 'No operations could be applied',
-                    applied_operations: [],
-                    pending_operations: [],
-                    rejected_operations: [],
-                    removed_vaults: []
-                };
-            }
-
             const appliedOperations = [];
             const pendingOperations = [];
-
-            // Process current valid pairs based on protection status
-            currentValidPairs.forEach(pair => {
-                const tag = getTagById(pair.tagId);
-                if (tag && tag.isProtected) {
-                    // Protected tags go to pending with request ID
-                    const reqId = `REQ-${String(Date.now()).slice(-6)}`;
-                    pendingOperations.push({
-                        vault: pair.vaultId,
-                        tag: pair.tagId,
-                        action: pair.action,
-                        status: 'pending',
-                        request_id: reqId
-                    });
-                } else {
-                    // Non-protected tags are applied immediately
-                    appliedOperations.push({
-                        vault: pair.vaultId,
-                        tag: pair.tagId,
-                        action: pair.action,
-                        status: 'final'
-                    });
-                }
-            });
-
-            // Add removed vaults if any
-            const removedVaults = currentRemovedVaults.map(vaultId => ({
-                vault: vaultId,
-                reason: 'capacity_exceeded',
-                current_attachments: 3, // Simplified for demo
-                attempted_additions: 1
-            }));
-
-            // Determine status and message
-            let status, message;
-            if (appliedOperations.length > 0 && pendingOperations.length > 0) {
-                status = 'partial_success';
-                message = 'Operations processed with mixed protection levels';
-            } else if (pendingOperations.length > 0 && appliedOperations.length === 0) {
-                status = 'approval_required';
-                message = 'All operations require approval';
-            } else if (appliedOperations.length > 0 && pendingOperations.length === 0) {
-                status = 'success';
-                message = 'All operations applied successfully';
-            } else {
-                status = 'no_operations_applied';
-                message = 'No operations could be applied';
+            const rejectedOperations = [];
+            
+            // Process valid pairs based on protection status
+            if (currentValidPairs && currentValidPairs.length > 0) {
+                currentValidPairs.forEach(pair => {
+                    const tag = getTagById(pair.tagId);
+                    if (tag && tag.isProtected) {
+                        // Protected tags go to pending with request ID
+                        const reqId = `REQ-${String(Date.now()).slice(-6)}`;
+                        pendingOperations.push({
+                            vault: pair.vaultId,
+                            tag: pair.tagId,
+                            action: pair.action,
+                            status: 'pending',
+                            request_id: reqId
+                        });
+                    } else {
+                        // Non-protected tags are applied immediately
+                        appliedOperations.push({
+                            vault: pair.vaultId,
+                            tag: pair.tagId,
+                            action: pair.action,
+                            status: 'final'
+                        });
+                    }
+                });
             }
 
-            return {
+            // Process removed pairs as rejected operations
+            if (currentRemovedPairs && currentRemovedPairs.length > 0) {
+                currentRemovedPairs.forEach(pair => {
+                    rejectedOperations.push({
+                        vault: pair.vaultId,
+                        tag: pair.tagId,
+                        action: pair.action,
+                        status: 'rejected',
+                        reason: pair.reason
+                    });
+                });
+            }
+
+            // Process removed vaults
+            const removedVaults = [];
+            if (currentRemovedVaults && currentRemovedVaults.length > 0) {
+                currentRemovedVaults.forEach(vaultId => {
+                    removedVaults.push({
+                        vault: vaultId,
+                        reason: 'capacity_exceeded',
+                        max_attachments: 3
+                    });
+                });
+            }
+
+            // Determine status and message based on all operations
+            let status, message;
+            const totalOperations = appliedOperations.length + pendingOperations.length + rejectedOperations.length;
+            
+            if (totalOperations === 0) {
+                status = 'no_operations_requested';
+                message = 'No operations were requested';
+            } else if (rejectedOperations.length === totalOperations) {
+                status = 'all_operations_rejected';
+                message = 'All operations were rejected';
+            } else if (appliedOperations.length > 0 && pendingOperations.length > 0 && rejectedOperations.length > 0) {
+                status = 'mixed_results';
+                message = `${appliedOperations.length} applied, ${pendingOperations.length} pending approval, ${rejectedOperations.length} rejected`;
+            } else if (appliedOperations.length > 0 && pendingOperations.length > 0) {
+                status = 'partial_success_mixed_protection';
+                message = `${appliedOperations.length} applied immediately, ${pendingOperations.length} require approval`;
+            } else if (appliedOperations.length > 0 && rejectedOperations.length > 0) {
+                status = 'partial_success_with_rejections';
+                message = `${appliedOperations.length} applied, ${rejectedOperations.length} rejected`;
+            } else if (pendingOperations.length > 0 && rejectedOperations.length > 0) {
+                status = 'pending_with_rejections';
+                message = `${pendingOperations.length} pending approval, ${rejectedOperations.length} rejected`;
+            } else if (pendingOperations.length > 0) {
+                status = 'all_pending_approval';
+                message = 'All valid operations require approval (protected tags)';
+            } else if (appliedOperations.length > 0) {
+                status = 'success';
+                message = 'All valid operations applied successfully';
+            } else if (rejectedOperations.length > 0) {
+                status = 'all_operations_rejected';
+                message = 'All operations were rejected';
+            }
+
+            const response = {
                 status: status,
                 message: message,
                 applied_operations: appliedOperations,
                 pending_operations: pendingOperations,
-                rejected_operations: [], // Would need more logic for actual rejections
-                removed_vaults: removedVaults
+                rejected_operations: rejectedOperations,
+                removed_vaults: removedVaults,
+                summary: {
+                    total_requested: totalOperations,
+                    applied_count: appliedOperations.length,
+                    pending_count: pendingOperations.length,
+                    rejected_count: rejectedOperations.length,
+                    removed_vault_count: removedVaults.length
+                }
             };
+
+            return response;
         }
 
         // Function to show current API response
@@ -4012,17 +4139,35 @@
             if (!currentApiResponse) {
                 currentApiResponse = generateApiResponse();
             }
+            
+            const originalApiCall = generateOriginalApiCall();
 
             const modalHtml = `
                 <div id="currentApiResponseModal" class="modal" style="display: block;">
-                    <div class="modal-content" style="max-width: 700px;">
+                    <div class="modal-content" style="max-width: 800px;">
                         <div class="modal-header">
-                            <h3 class="modal-title">🚀 Current API Response</h3>
+                            <h3 class="modal-title">🚀 API Request & Response</h3>
                             <button class="close" onclick="closeCurrentApiResponseModal()">&times;</button>
                         </div>
                         <div style="padding: 20px;">
-                            <p style="margin-bottom: 15px; color: #28a745; font-size: 13px;">API would return 200 OK with this response for the current operations:</p>
-                            <pre class="json-response">HTTP 200 OK\n${JSON.stringify(currentApiResponse, null, 2)}</pre>
+                            <div style="margin-bottom: 25px;">
+                                <h4 style="color: #0066cc; margin-bottom: 10px;">📤 Original API Request</h4>
+                                <p style="margin-bottom: 10px; color: #6c757d; font-size: 13px;">The API call that would be made based on your inputs:</p>
+                                <pre class="json-response" style="background-color: #f8f9fa; border-left: 4px solid #0066cc;">${originalApiCall.method} ${originalApiCall.url}
+
+${JSON.stringify({
+    headers: originalApiCall.headers,
+    body: originalApiCall.body
+}, null, 2)}</pre>
+                            </div>
+                            
+                            <div>
+                                <h4 style="color: #28a745; margin-bottom: 10px;">📥 API Response</h4>
+                                <p style="margin-bottom: 10px; color: #6c757d; font-size: 13px;">The response returned by the API after processing:</p>
+                                <pre class="json-response" style="background-color: #f8f9fa; border-left: 4px solid #28a745;">HTTP 200 OK
+
+${JSON.stringify(currentApiResponse, null, 2)}</pre>
+                            </div>
                         </div>
                         <div class="modal-buttons">
                             <button class="btn-secondary" onclick="closeCurrentApiResponseModal()">Close</button>
@@ -4060,6 +4205,50 @@
         // Function to ensure API response is reset when operations change
         function resetApiResponse() {
             currentApiResponse = null;
+        }
+
+        // Function to show API response from wizard context
+        function showApiResponseFromWizard() {
+            // Reset and regenerate the API response based on current operations
+            currentApiResponse = null;
+            showCurrentApiResponse();
+        }
+
+        // Function to generate the original API call based on current wizard inputs
+        function generateOriginalApiCall() {
+            // Extract the original inputs from candidates
+            const vaults = new Set();
+            const addTags = new Set();
+            const removeTags = new Set();
+            
+            // Get the original input data from candidates
+            if (currentCandidates && currentCandidates.length > 0) {
+                currentCandidates.forEach(candidate => {
+                    vaults.add(candidate.vaultId);
+                    if (candidate.action === 'add') {
+                        addTags.add(candidate.tagId);
+                    } else if (candidate.action === 'remove') {
+                        removeTags.add(candidate.tagId);
+                    }
+                });
+            }
+            
+            // Create the API call object with the 3 arrays
+            const apiCall = {
+                method: 'POST',
+                url: '/api/vault-tags/batch',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer <your-api-token>'
+                },
+                body: {
+                    vaults: Array.from(vaults),
+                    tags_to_add: Array.from(addTags),
+                    tags_to_remove: Array.from(removeTags)
+                }
+            };
+            
+            return apiCall;
         }
 
         // Helper function to get tag by ID
