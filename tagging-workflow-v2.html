@@ -1349,7 +1349,9 @@
                                     <li>Cannot add if pending request exists for same pair</li>
                                     <li>Cannot remove non-existent attachments</li>
                                     <li>Cannot remove if pending request exists</li>
-                                    <li>Cannot process invalid/pending-edit tags</li>
+                                    <li><strong>Cannot use tags with pending edit status</strong> (awaiting approval)</li>
+                                    <li>Cannot use tags that don't exist in tags table</li>
+                                    <li>Protected tag operations create pending status requiring approval</li>
                                 </ul>
                             </div>
 
@@ -1366,10 +1368,10 @@
 
                                 <div class="example-case"
                                     style="margin-bottom: 12px; padding: 8px; background: #fff3cd; border-radius: 4px;">
-                                    <div style="font-weight: 600; font-size: 12px; color: #856404;">Already Exists:
+                                    <div style="font-weight: 600; font-size: 12px; color: #856404;">Tag Unavailable:
                                     </div>
-                                    <div style="font-size: 12px; color: #333;">Add t1 to v1, but v1-t1 is final → <span
-                                            style="color: #dc3545; font-weight: 600;">operation rejected</span></div>
+                                    <div style="font-size: 12px; color: #333;">Try to use tag with pending edit request → <span
+                                            style="color: #dc3545; font-weight: 600;">operation blocked until resolved</span></div>
                                 </div>
 
                                 <div class="example-case"
@@ -1380,6 +1382,14 @@
                                             style="color: #ffc107; font-weight: 600;">pending</span>, Add general tag →
                                         <span style="color: #28a745; font-weight: 600;">final</span>
                                     </div>
+                                </div>
+
+                                <div class="example-case"
+                                    style="margin-bottom: 12px; padding: 8px; background: #f8d7da; border-radius: 4px;">
+                                    <div style="font-weight: 600; font-size: 12px; color: #721c24;">Duplicate Prevention:
+                                    </div>
+                                    <div style="font-size: 12px; color: #333;">Add t1 to v1, but v1-t1 already exists → <span
+                                            style="color: #dc3545; font-weight: 600;">operation rejected</span></div>
                                 </div>
                             </div>
                         </div>
@@ -1599,28 +1609,41 @@
                     <h4>🎯 System Overview</h4>
                     <div class="overview-section">
                         <p>The tagging system manages vault-tag attachments with validation, approval workflows, and
-                            capacity constraints. Operations are processed through a multi-step wizard that validates
-                            inputs, sanitizes candidates, and applies changes based on tag protection levels.</p>
+                            capacity constraints. Tags have unique labels and IDs, with protected tags requiring approval
+                            for modifications. The system prevents conflicts and ensures data integrity through comprehensive
+                            validation and state management.</p>
                     </div>
 
-                    <h4>🔒 Tag Protection Types</h4>
+                    <h4>🔒 Tag Protection & Management</h4>
                     <div class="protection-comparison">
                         <div class="protection-type protected">
                             <h5>🔒 Protected Tags</h5>
                             <div class="protection-features">
-                                <div class="feature">• Require approval for operations</div>
-                                <div class="feature">• Create pending requests</div>
+                                <div class="feature">• Require approval for attach/detach operations</div>
+                                <div class="feature">• Require approval for label/delete changes</div>
+                                <div class="feature">• Cannot have multiple simultaneous requests</div>
+                                <div class="feature">• Editing/deleting disabled during pending approval</div>
                                 <div class="feature">• Examples: compliance, kyc-required</div>
                             </div>
                         </div>
                         <div class="protection-type non-protected">
                             <h5>⚡ Non-Protected Tags</h5>
                             <div class="protection-features">
-                                <div class="feature">• Apply immediately</div>
-                                <div class="feature">• No approval needed</div>
+                                <div class="feature">• Apply operations immediately</div>
+                                <div class="feature">• Direct label editing allowed</div>
+                                <div class="feature">• No approval workflows</div>
                                 <div class="feature">• Examples: general-use</div>
                             </div>
                         </div>
+                    </div>
+
+                    <h4>🎯 Key Validation Rules</h4>
+                    <div class="validation-rules">
+                        <div class="rule-item">• <strong>Unique Labels:</strong> Case-insensitive validation prevents duplicates</div>
+                        <div class="rule-item">• <strong>Single Requests:</strong> Protected tags can only have one pending approval at a time</div>
+                        <div class="rule-item">• <strong>Conflict Resolution:</strong> First approved request wins when multiple target same label</div>
+                        <div class="rule-item">• <strong>State Dependencies:</strong> Pending edit tags cannot be used in operations</div>
+                        <div class="rule-item">• <strong>Attachment Constraints:</strong> Tags with attachments cannot be deleted</div>
                     </div>
 
                     <h4>🎭 Status Types</h4>
@@ -1643,14 +1666,16 @@
                         </div>
                     </div>
 
-                    <h4>📋 Detailed Rules</h4>
+                    <h4>📋 Implementation Details</h4>
                     <div class="detailed-rules-section">
-                        <p>For specific rules and examples:</p>
+                        <p><strong>Real-time Updates:</strong> Tags and attachments tables automatically sync when status changes occur.</p>
+                        <p><strong>User Feedback:</strong> Tooltips and disabled states provide clear indication of why operations are blocked.</p>
+                        <p><strong>Data Integrity:</strong> All validations occur both client-side and server-side to prevent invalid states.</p>
+                        
+                        <p style="margin-top: 15px;">For comprehensive rules and examples:</p>
                         <ul>
-                            <li><strong>Attachments Table:</strong> See rules section above the table for capacity
-                                limits, status constraints, and operation examples</li>
-                            <li><strong>Tags Table:</strong> See rules section above the table for protection workflows,
-                                tag management, and validation requirements</li>
+                            <li><strong>Attachments Table:</strong> Capacity limits, status constraints, and operation examples</li>
+                            <li><strong>Tags Table:</strong> Protection workflows, label management, and validation requirements</li>
                         </ul>
                     </div>
                 </div>
