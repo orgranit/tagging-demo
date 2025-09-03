@@ -1876,45 +1876,42 @@
     {"vault": "v3", "tag": "general-use", "action": "remove", "reason": "attachment_not_found"},
     {"vault": "v4", "tag": "kyc-required", "action": "add", "reason": "pending_request_exists"},
     {"vault": "v5", "tag": "compliance", "action": "remove", "reason": "tag_being_modified"}
-  ],
-  "removed_vaults": []
+  ]
 }</pre>
                 </div>
 
                 <div class="error-example">
-                    <h5>🚧 Capacity Exceeded (Vault Removal)</h5>
+                    <h5>🚧 Capacity Exceeded (Individual Rejections)</h5>
                     <pre class="json-response">HTTP 200 OK
 {
-  "status": "partial_success",
-  "message": "Vaults removed due to capacity exceeded",
+  "status": "partial_success_with_rejections",
+  "message": "1 applied, 1 pending approval, 2 rejected",
   "applied_operations": [
     {"vault": "v1", "tag": "general-use", "action": "add", "status": "final"}
   ],
   "pending_operations": [
     {"vault": "v2", "tag": "compliance", "action": "add", "status": "pending", "request_id": "REQ-456789"}
   ],
-  "rejected_operations": [],
-  "removed_vaults": [
-    {"vault": "v3", "reason": "capacity_exceeded", "current_attachments": 3, "attempted_additions": 2}
+  "rejected_operations": [
+    {"vault": "v3", "tag": "kyc-required", "action": "add", "reason": "capacity_exceeded"},
+    {"vault": "v3", "tag": "general-use", "action": "add", "reason": "capacity_exceeded"}
   ]
 }</pre>
                 </div>
 
                 <div class="error-example">
-                    <h5>🔄 Mixed Rejections & Vault Removal</h5>
+                    <h5>🔄 Mixed Rejections</h5>
                     <pre class="json-response">HTTP 200 OK
 {
-  "status": "partial_success",
-  "message": "Mixed sanitization issues occurred",
+  "status": "partial_success_with_rejections",
+  "message": "1 applied, 2 rejected",
   "applied_operations": [
     {"vault": "v1", "tag": "general-use", "action": "add", "status": "final"}
   ],
   "pending_operations": [],
   "rejected_operations": [
-    {"vault": "v2", "tag": "compliance", "action": "add", "reason": "attachment_already_exists"}
-  ],
-  "removed_vaults": [
-    {"vault": "v3", "reason": "capacity_exceeded", "current_attachments": 3, "attempted_additions": 1}
+    {"vault": "v2", "tag": "compliance", "action": "add", "reason": "attachment_already_exists"},
+    {"vault": "v3", "tag": "kyc-required", "action": "add", "reason": "capacity_exceeded"}
   ]
 }</pre>
                 </div>
@@ -1977,7 +1974,7 @@
   "pending_operations": [
     {"vault": "v1", "tag": "compliance", "action": "add", "status": "pending", "request_id": "REQ-111222"},
     {"vault": "v2", "tag": "kyc-required", "action": "remove", "status": "pending", "request_id": "REQ-111222"},
-    {"vault": "v3", "tag": "compliance", "action": "remove", "status": "pending", "request_id": "REQ-333444"}
+    {"vault": "v3", "tag": "compliance", "action": "remove", "status": "pending", "request_id": "REQ-111222"}
   ],
   "rejected_operations": [],
   "removed_vaults": []
@@ -2055,25 +2052,23 @@
     {"vault": "v1", "tag": "compliance", "action": "add", "reason": "attachment_already_exists"},
     {"vault": "v2", "tag": "general-use", "action": "remove", "reason": "attachment_not_found"},
     {"vault": "v3", "tag": "kyc-required", "action": "add", "reason": "pending_request_exists"}
-  ],
-  "removed_vaults": []
+  ]
 }</pre>
                 </div>
 
                 <div class="error-example">
-                    <h5>🚧 Everything Failed (Rejections + Vault Removal)</h5>
+                    <h5>🚧 Everything Failed (All Rejections)</h5>
                     <pre class="json-response">HTTP 200 OK
 {
-  "status": "no_operations_applied",
-  "message": "No operations could be applied",
+  "status": "all_operations_rejected",
+  "message": "All operations were rejected",
   "applied_operations": [],
   "pending_operations": [],
   "rejected_operations": [
-    {"vault": "v1", "tag": "general-use", "action": "add", "reason": "attachment_already_exists"}
-  ],
-  "removed_vaults": [
-    {"vault": "v2", "reason": "capacity_exceeded", "current_attachments": 3, "attempted_additions": 1},
-    {"vault": "v3", "reason": "capacity_exceeded", "current_attachments": 3, "attempted_additions": 2}
+    {"vault": "v1", "tag": "general-use", "action": "add", "reason": "attachment_already_exists"},
+    {"vault": "v2", "tag": "kyc-required", "action": "add", "reason": "capacity_exceeded"},
+    {"vault": "v3", "tag": "compliance", "action": "add", "reason": "capacity_exceeded"},
+    {"vault": "v3", "tag": "general-use", "action": "add", "reason": "capacity_exceeded"}
   ]
 }</pre>
                 </div>
@@ -2923,18 +2918,34 @@
             const validPairCount = new Map();
             const log = [];
 
+            // Pre-calculate capacity check: count attach operations per vault
+            const attachCounts = new Map();
+            candidates.forEach(candidate => {
+                if (candidate.action === 'add') {
+                    attachCounts.set(candidate.vaultId, (attachCounts.get(candidate.vaultId) || 0) + 1);
+                }
+            });
+
+            // Identify vaults that would exceed capacity (current attachments + new attachments > 3)
+            const capacityExceededVaults = new Set();
+            attachCounts.forEach((attachCount, vaultId) => {
+                const existingCount = attachments.filter(att => att.vaultId === vaultId).length;
+                if (existingCount + attachCount > 3) {
+                    capacityExceededVaults.add(vaultId);
+                }
+            });
+
             for (let i = 0; i < candidates.length; i++) {
                 const candidate = candidates[i];
                 const { vaultId, tagId, action } = candidate;
 
                 let isValid = true;
                 let reason = '';
-                let shouldRemoveVault = false;
 
-                // Rule 1: Check if vault was removed earlier
-                if (removedVaults.has(vaultId)) {
+                // Rule 1: Check if vault exceeds capacity - if so, reject ALL pairs for this vault
+                if (capacityExceededVaults.has(vaultId)) {
                     isValid = false;
-                    reason = 'vault removed earlier';
+                    reason = 'capacity_exceeded';
                 } else if (action === 'add') {
                     // Rule 2a: Check if attachment already exists or has pending request
                     const existingAttachment = attachments.find(att =>
@@ -2948,19 +2959,6 @@
                         isValid = false;
                         reason = 'pending request exists';
                         // V2: Don't remove vault, just reject this pair
-                    } else {
-                        // Rule 2b: Check capacity limit (count existing + pending + current batch + this candidate)
-                        const existingCount = attachments.filter(att =>
-                            att.vaultId === vaultId && att.status !== 'pending remove'
-                        ).length;
-                        const currentBatchCount = validPairCount.get(vaultId) || 0;
-                        const totalCountAfterAdding = existingCount + currentBatchCount + 1;
-
-                        if (totalCountAfterAdding > 3) {
-                            isValid = false;
-                            reason = 'capacity reached (max 3)';
-                            shouldRemoveVault = true; // V2: Only remove vault on capacity exceeded
-                        }
                     }
                 } else if (action === 'remove') {
                     // Rule 3: Can only remove existing final attachments, not pending ones
@@ -3001,31 +2999,6 @@
                         status: 'FAIL',
                         reason: reason
                     });
-
-                    // V2: Only remove vault if it's a capacity issue
-                    if (shouldRemoveVault && !removedVaults.has(vaultId)) {
-                        // Remove vault due to capacity exceeded
-                        removedVaults.add(vaultId);
-
-                        // Purge previously accepted pairs for this vault
-                        const originalLength = validPairs.length;
-                        for (let j = validPairs.length - 1; j >= 0; j--) {
-                            if (validPairs[j].vaultId === vaultId) {
-                                validPairs.splice(j, 1);
-                            }
-                        }
-
-                        // Reset count
-                        validPairCount.set(vaultId, 0);
-
-                        log.push({
-                            step: i + 1,
-                            candidate: candidate,
-                            status: 'VAULT_REMOVED',
-                            reason: `Vault ${vaultId} removed due to capacity exceeded`,
-                            vaultRemoved: true
-                        });
-                    }
                     // V2: For non-capacity failures, just reject the individual pair
                 }
             }
@@ -3988,11 +3961,6 @@
                         `;
                     }
 
-                    let removedVaultsSection = '';
-                    if (currentRemovedVaults.length > 0) {
-                        removedVaultsSection = `<div class="removed-vaults" style="margin-top: 20px;">Removed vaults: ${currentRemovedVaults.join(', ')}</div>`;
-                    }
-
                     let apiResponseButton = `
                         <div style="text-align: center; margin-top: 20px;">
                             <button 
@@ -4006,7 +3974,7 @@
                         </div>
                     `;
 
-                    content.innerHTML = protectedSection + nonProtectedSection + removedPairsSection + removedVaultsSection + apiResponseButton;
+                    content.innerHTML = protectedSection + nonProtectedSection + removedPairsSection + apiResponseButton;
 
                     // Clean up animations
                     setTimeout(() => {
@@ -4132,12 +4100,7 @@
                 `;
             }
 
-            let removedVaultsHtml = '';
-            if (currentRemovedVaults.length > 0) {
-                removedVaultsHtml = `<div class="removed-vaults" style="margin-top: 20px;">Removed vaults: ${currentRemovedVaults.join(', ')}</div>`;
-            }
-
-            container.innerHTML = validPairsHtml + removedPairsHtml + removedVaultsHtml;
+            container.innerHTML = validPairsHtml + removedPairsHtml;
         }
 
         // Global validation state for API response
@@ -4395,17 +4358,19 @@
 
             // Process valid pairs based on protection status
             if (currentValidPairs && currentValidPairs.length > 0) {
+                // Generate single request ID for all protected operations in this API call
+                const requestId = `REQ-${String(Date.now()).slice(-6)}`;
+                
                 currentValidPairs.forEach(pair => {
                     const tag = getTagById(pair.tagId);
                     if (tag && tag.isProtected) {
-                        // Protected tags go to pending with request ID
-                        const reqId = `REQ-${String(Date.now()).slice(-6)}`;
+                        // Protected tags go to pending with shared request ID
                         pendingOperations.push({
                             vault: pair.vaultId,
                             tag: pair.tagId,
                             action: pair.action,
                             status: 'pending',
-                            request_id: reqId
+                            request_id: requestId
                         });
                     } else {
                         // Non-protected tags are applied immediately
@@ -4432,17 +4397,7 @@
                 });
             }
 
-            // Process removed vaults
-            const removedVaults = [];
-            if (currentRemovedVaults && currentRemovedVaults.length > 0) {
-                currentRemovedVaults.forEach(vaultId => {
-                    removedVaults.push({
-                        vault: vaultId,
-                        reason: 'capacity_exceeded',
-                        max_attachments: 3
-                    });
-                });
-            }
+            // Note: Vault capacity issues are now handled as individual rejected operations
 
             // Determine status and message based on all operations
             let status, message;
@@ -4482,15 +4437,7 @@
                 message: message,
                 applied_operations: appliedOperations,
                 pending_operations: pendingOperations,
-                rejected_operations: rejectedOperations,
-                removed_vaults: removedVaults,
-                summary: {
-                    total_requested: totalOperations,
-                    applied_count: appliedOperations.length,
-                    pending_count: pendingOperations.length,
-                    rejected_count: rejectedOperations.length,
-                    removed_vault_count: removedVaults.length
-                }
+                rejected_operations: rejectedOperations
             };
 
             return response;
