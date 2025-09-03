@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vault Account Tagging API Documentation</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui.css" />
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+
+        *,
+        *:before,
+        *:after {
+            box-sizing: inherit;
+        }
+
+        body {
+            margin: 0;
+            background: #fafafa;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        .header {
+            background: #1f2937;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+
+        .header p {
+            margin: 5px 0 0 0;
+            opacity: 0.8;
+            font-size: 14px;
+        }
+
+        .navigation {
+            background: white;
+            padding: 15px 0;
+            text-align: center;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .navigation a {
+            display: inline-block;
+            margin: 0 15px;
+            padding: 8px 16px;
+            text-decoration: none;
+            color: #3b82f6;
+            border: 1px solid #3b82f6;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .navigation a:hover {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .navigation a.active {
+            background-color: #1f2937;
+            border-color: #1f2937;
+            color: white;
+        }
+
+        #swagger-ui {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Custom Swagger UI styling */
+        .swagger-ui .topbar {
+            display: none;
+        }
+
+        .swagger-ui .info {
+            margin: 30px 0;
+        }
+
+        .swagger-ui .info .title {
+            color: #1f2937;
+        }
+
+        /* Enhance the operation blocks */
+        .swagger-ui .opblock.opblock-post {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .swagger-ui .opblock.opblock-post .opblock-summary-method {
+            background: #10b981;
+        }
+
+        /* Custom example styling */
+        .swagger-ui .examples-select {
+            margin-bottom: 10px;
+        }
+
+        /* Response examples styling */
+        .swagger-ui .response-col_status {
+            font-weight: bold;
+        }
+
+        .swagger-ui .response-col_status.response-200 {
+            color: #10b981;
+        }
+
+        .swagger-ui .response-col_status.response-400 {
+            color: #ef4444;
+        }
+
+        /* Enhance example selection styling */
+        .swagger-ui .examples-select {
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            border: 2px solid #10b981;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .swagger-ui .examples-select select {
+            background: transparent;
+            border: none;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        /* Make Try it out button more prominent */
+        .swagger-ui .btn.try-out__btn {
+            background: #10b981 !important;
+            color: white !important;
+            border: 2px solid #10b981 !important;
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .swagger-ui .btn.try-out__btn:hover {
+            background: #0f766e !important;
+            border-color: #0f766e !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Execute button styling */
+        .swagger-ui .btn.execute {
+            background: #3b82f6 !important;
+            border-color: #3b82f6 !important;
+            font-weight: 600;
+            padding: 12px 32px;
+            border-radius: 8px;
+        }
+
+        .swagger-ui .btn.execute:hover {
+            background: #2563eb !important;
+            border-color: #2563eb !important;
+        }
+
+        /* Disable request body editing - show but make read-only */
+        .swagger-ui .body-param textarea {
+            pointer-events: none !important;
+            background-color: #f8f9fa !important;
+            border: 1px solid #e9ecef !important;
+            color: #6c757d !important;
+            cursor: not-allowed !important;
+        }
+
+        .swagger-ui .body-param .body-param-edit {
+            pointer-events: none !important;
+        }
+
+        /* Add visual indicator that body is read-only */
+        .swagger-ui .body-param::after {
+            content: "📋 Request body is read-only. Use examples dropdown to switch scenarios.";
+            display: block;
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #1976d2;
+            font-style: italic;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px 0;
+            text-align: center;
+            margin-top: 40px;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .footer p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        /* Loading indicator */
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #6b7280;
+        }
+
+        .loading::after {
+            content: "";
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 50%;
+            border-top-color: #3b82f6;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .navigation a {
+                display: block;
+                margin: 5px 15px;
+            }
+
+            #swagger-ui {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔥 Vault Account Tagging API</h1>
+        <p>Interactive API documentation with pre-filled examples for all scenarios</p>
+    </div>
+
+    <div class="navigation">
+        <a href="./tagging-workflow-v2.html">📊 Interactive Simulator</a>
+        <a href="./tagging-api-docs-standalone.html" class="active">📚 API Documentation</a>
+        <a href="./tagging-api.yaml" target="_blank">📄 OpenAPI Spec</a>
+        <a href="https://github.com/orgranit/tagging-demo" target="_blank">💻 GitHub Repository</a>
+    </div>
+
+    <div id="swagger-ui">
+        <div class="loading">Loading API documentation...</div>
+    </div>
+
+    <div class="footer">
+        <p>
+            Self-contained Swagger UI with embedded OpenAPI specification • 
+            <a href="https://fireblocks.com" target="_blank" style="color: #3b82f6;">Fireblocks</a> • 
+            Last updated: <span id="last-updated"></span>
+        </p>
+    </div>
+
+    <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-standalone-preset.js"></script>
+    <script src="https://unpkg.com/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    <script>
+        // Set last updated date
+        document.getElementById('last-updated').textContent = new Date().toLocaleDateString();
+
+        // Initialize Swagger UI
+        window.onload = function() {
+            try {
+                // Embedded YAML specification - completely self-contained
+                const yamlSpec = `openapi: 3.0.3
+info:
+  title: Vault Account Tagging API
+  description: |
+    API for managing vault account tag attachments with support for protected tags, 
+    capacity constraints, and approval workflows.
+    
+    ## Key Features
+    - **Protected vs Non-Protected Tags**: Protected tags require approval, non-protected apply immediately
+    - **Capacity Management**: Maximum 3 attachments per vault account
+    - **Batch Operations**: Single API call for multiple vault accounts and tags
+    - **Comprehensive Validation**: Input validation with detailed error responses
+    
+    ## 🎯 Interactive Examples
+    
+    This documentation includes **15 comprehensive scenarios** with pre-filled request examples:
+    
+    **Success Scenarios (200 responses):**
+    - 🟢 **Scenario 1**: All applied - non-protected tags
+    - 🟡 **Scenario 2**: All pending - protected tags require approval
+    - 🔀 **Scenario 3**: Mixed results - applied + pending + rejected
+    - 🚫 **Scenario 4**: All rejected - capacity exceeded
+    - 🚫 **Scenario 6**: All rejected - attachments already exist
+    - 🚫 **Scenario 7**: All rejected - attachments don't exist
+    - 🚫 **Scenario 8**: All rejected - pending requests exist
+    - 🚫 **Scenario 9**: All rejected - capacity exceeded with mixed operations
+    
+    **Server Error (500 response):**
+    - 💥 **Scenario 5**: Server error - internal processing failure
+    
+    **Validation Scenarios (400 responses):**
+    - ⚠️ **Invalid vault IDs** - Non-numeric vault account IDs
+    - ⚠️ **Too many tags to attach** - Exceeds 3 tag limit
+    - ⚠️ **Too many tags to detach** - Exceeds 3 tag limit  
+    - ⚠️ **Conflicting operations** - Same tag in attach and detach
+    - ⚠️ **Tags not found** - Non-existent tag references
+    - ⚠️ **Tags being edited** - Tags currently being modified
+    
+    **How to use:** 
+    1. Click "Try it out" on the endpoint below
+    2. Select any scenario from the "Example" dropdown  
+    3. Click "Execute" to see the expected response
+    4. Modify the request to test your own scenarios!
+  version: 1.0.0
+  contact:
+    name: Fireblocks API Team
+servers:
+  - url: /mock/v1
+    description: Mock server - returns predefined responses based on input scenarios
+
+paths:
+  /vault/accounts/tags:
+    post:
+      summary: Batch attach/detach tags to vault accounts
+      description: |
+        Attach and/or detach tags from multiple vault accounts in a single operation.
+        
+        **Processing Logic:**
+        1. **Input Validation**: Validates arrays, tag existence, and constraints
+        2. **Capacity Check**: Ensures vault accounts don't exceed 3 total attachments
+        3. **Operation Processing**: Handles protected vs non-protected tags differently
+        4. **Response Generation**: Returns applied, pending, and rejected operations
+      operationId: batchUpdateVaultAccountTags
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchTagRequest'
+            examples:
+              scenario_1_all_applied:
+                summary: "🟢 Scenario 1: All applied (non-protected tags)"
+                description: "Non-protected tags that apply immediately"
+                value:
+                  vaultAccountIds: ["1", "2"]
+                  tagIdsToAttach: ["t1-non-protected", "t2-non-protected"]
+                  tagIdsToDetach: ["t3-non-protected-old"]
+              scenario_2_all_pending:
+                summary: "🟡 Scenario 2: All pending (protected tags)"
+                description: "Protected tags that require approval"
+                value:
+                  vaultAccountIds: ["1", "2"]
+                  tagIdsToAttach: ["t4-protected", "t5-protected"]
+                  tagIdsToDetach: ["t6-protected-old"]
+              scenario_3_mixed_results:
+                summary: "🔀 Scenario 3: Mixed results (applied + pending + rejected)"
+                description: "Combination of protected, non-protected, and rejected operations"
+                value:
+                  vaultAccountIds: ["1", "2", "3"]
+                  tagIdsToAttach: ["t1-non-protected", "t4-protected"]
+                  tagIdsToDetach: ["t7-non-protected-temp"]
+              scenario_4_all_rejected:
+                summary: "🚫 Scenario 4: All rejected (capacity exceeded)"
+                description: "All operations rejected due to capacity limits"
+                value:
+                  vaultAccountIds: ["1"]
+                  tagIdsToAttach: ["t8-non-protected", "t9-non-protected"]
+                  tagIdsToDetach: []
+              scenario_5_server_error:
+                summary: "💥 Scenario 5: Server error (500)"
+                description: "Internal server error during processing"
+                value:
+                  vaultAccountIds: ["1", "2"]
+                  tagIdsToAttach: ["t1-non-protected", "t4-protected"]
+                  tagIdsToDetach: ["t99-server-error"]
+              scenario_6_all_rejected_already_exists:
+                summary: "🚫 Scenario 6: All rejected - attachments already exist"
+                description: "All operations rejected because attachments already exist"
+                value:
+                  vaultAccountIds: ["1", "2"]
+                  tagIdsToAttach: ["t10-already-attached", "t11-already-exists"]
+                  tagIdsToDetach: []
+              scenario_7_all_rejected_not_attached:
+                summary: "🚫 Scenario 7: All rejected - attachments don't exist"
+                description: "All operations rejected because attachments don't exist for detach"
+                value:
+                  vaultAccountIds: ["1", "2"]
+                  tagIdsToAttach: []
+                  tagIdsToDetach: ["t12-not-attached", "t13-missing"]
+              scenario_8_all_rejected_pending_exists:
+                summary: "🚫 Scenario 8: All rejected - pending requests exist"
+                description: "All operations rejected due to existing pending requests"
+                value:
+                  vaultAccountIds: ["1", "2"]
+                  tagIdsToAttach: ["t14-has-pending-attach"]
+                  tagIdsToDetach: ["t15-has-pending-detach"]
+              scenario_9_capacity_with_mixed_operations:
+                summary: "🚫 Scenario 9: Capacity exceeded - entire vault removed"
+                description: "When capacity exceeded, both attach and detach operations for entire vault are rejected"
+                value:
+                  vaultAccountIds: ["1", "2"]
+                  tagIdsToAttach: ["t16-will-exceed", "t17-capacity"]
+                  tagIdsToDetach: ["t18-old-tag", "t19-remove-me"]
+              validation_invalid_vaults:
+                summary: "⚠️ Validation: Invalid vault IDs"
+                description: "Vault IDs must be numeric strings"
+                value:
+                  vaultAccountIds: ["invalid-vault", "abc123"]
+                  tagIdsToAttach: ["t1-non-protected"]
+                  tagIdsToDetach: []
+              validation_too_many_attach:
+                summary: "⚠️ Validation: Too many tags to attach"
+                description: "Maximum 3 tags allowed in attach array"
+                value:
+                  vaultAccountIds: ["1", "2"]
+                  tagIdsToAttach: ["t1", "t2", "t3", "t4", "t5"]
+                  tagIdsToDetach: []
+              validation_too_many_detach:
+                summary: "⚠️ Validation: Too many tags to detach"
+                description: "Maximum 3 tags allowed in detach array"
+                value:
+                  vaultAccountIds: ["1", "2"]
+                  tagIdsToAttach: []
+                  tagIdsToDetach: ["t1", "t2", "t3", "t4"]
+              validation_conflicting_tags:
+                summary: "⚠️ Validation: Conflicting operations"
+                description: "Same tag in both attach and detach arrays"
+                value:
+                  vaultAccountIds: ["1", "2"]
+                  tagIdsToAttach: ["t1-non-protected", "t2-protected"]
+                  tagIdsToDetach: ["t2-protected", "t3-old"]
+              validation_tags_not_found:
+                summary: "⚠️ Validation: Tags not found"
+                description: "Referenced tags do not exist"
+                value:
+                  vaultAccountIds: ["1", "2"]
+                  tagIdsToAttach: ["non-existent-tag-1", "non-existent-tag-2"]
+                  tagIdsToDetach: []
+              validation_tags_being_edited:
+                summary: "⚠️ Validation: Tags being edited"
+                description: "Tags currently being modified cannot be used"
+                value:
+                  vaultAccountIds: ["1", "2"]
+                  tagIdsToAttach: ["t1-being-edited", "t2-being-modified"]
+                  tagIdsToDetach: []
+      responses:
+        '200':
+          description: Operations processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTagResponse'
+              examples:
+                response_scenario_1:
+                  summary: "🟢 Response: All operations applied immediately"
+                  description: "Response for Scenario 1 - non-protected tags"
+                  value:
+                    status: "success"
+                    message: "All valid operations applied successfully"
+                    appliedOperations:
+                      - vaultAccountId: "1"
+                        tagId: "t1-non-protected"
+                        action: "attach"
+                        status: "final"
+                      - vaultAccountId: "1"
+                        tagId: "t2-non-protected"
+                        action: "attach"
+                        status: "final"
+                      - vaultAccountId: "2"
+                        tagId: "t1-non-protected"
+                        action: "attach"
+                        status: "final"
+                      - vaultAccountId: "2"
+                        tagId: "t2-non-protected"
+                        action: "attach"
+                        status: "final"
+                      - vaultAccountId: "1"
+                        tagId: "t3-non-protected-old"
+                        action: "detach"
+                        status: "final"
+                    pendingOperations: []
+                    rejectedOperations: []
+                response_scenario_2:
+                  summary: "🟡 Response: All operations require approval"
+                  description: "Response for Scenario 2 - protected tags"
+                  value:
+                    status: "all_pending_approval"
+                    message: "All valid operations require approval (protected tags)"
+                    appliedOperations: []
+                    pendingOperations:
+                      - vaultAccountId: "1"
+                        tagId: "t4-protected"
+                        action: "attach"
+                        status: "pending"
+                        requestId: "REQ-234567"
+                      - vaultAccountId: "1"
+                        tagId: "t5-protected"
+                        action: "attach"
+                        status: "pending"
+                        requestId: "REQ-234567"
+                      - vaultAccountId: "2"
+                        tagId: "t4-protected"
+                        action: "attach"
+                        status: "pending"
+                        requestId: "REQ-234567"
+                      - vaultAccountId: "2"
+                        tagId: "t5-protected"
+                        action: "attach"
+                        status: "pending"
+                        requestId: "REQ-234567"
+                      - vaultAccountId: "1"
+                        tagId: "t6-protected-old"
+                        action: "detach"
+                        status: "pending"
+                        requestId: "REQ-234567"
+                    rejectedOperations: []
+                response_scenario_3:
+                  summary: "🔀 Response: Mixed results (applied + pending + rejected)"
+                  description: "Response for Scenario 3 - combination of all result types"
+                  value:
+                    status: "mixed_results"
+                    message: "2 applied, 1 pending approval, 4 rejected"
+                    appliedOperations:
+                      - vaultAccountId: "1"
+                        tagId: "t1-non-protected"
+                        action: "attach"
+                        status: "final"
+                      - vaultAccountId: "1"
+                        tagId: "t7-non-protected-temp"
+                        action: "detach"
+                        status: "final"
+                    pendingOperations:
+                      - vaultAccountId: "2"
+                        tagId: "t4-protected"
+                        action: "attach"
+                        status: "pending"
+                        requestId: "REQ-345678"
+                    rejectedOperations:
+                      - vaultAccountId: "3"
+                        tagId: "t1-non-protected"
+                        action: "attach"
+                        reason: "capacity_exceeded"
+                      - vaultAccountId: "3"
+                        tagId: "t4-protected"
+                        action: "attach"
+                        reason: "capacity_exceeded"
+                      - vaultAccountId: "2"
+                        tagId: "t1-non-protected"
+                        action: "attach"
+                        reason: "attachment_already_exists"
+                      - vaultAccountId: "2"
+                        tagId: "t7-non-protected-temp"
+                        action: "detach"
+                        reason: "attachment_does_not_exist"
+                response_scenario_4:
+                  summary: "🚫 Response: Operations rejected due to capacity limits"
+                  description: "Response for Scenario 4 - vault account already has 3 attachments"
+                  value:
+                    status: "all_operations_rejected"
+                    message: "All operations rejected due to capacity limits"
+                    appliedOperations: []
+                    pendingOperations: []
+                    rejectedOperations:
+                      - vaultAccountId: "1"
+                        tagId: "t8-non-protected"
+                        action: "attach"
+                        reason: "capacity_exceeded"
+                      - vaultAccountId: "1"
+                        tagId: "t9-non-protected"
+                        action: "attach"
+                        reason: "capacity_exceeded"
+                response_scenario_5:
+                  summary: "❌ Response: All operations rejected (various reasons)"
+                  description: "Response for Scenario 5 - attachment already exists, tag being edited, etc."
+                  value:
+                    status: "all_operations_rejected"
+                    message: "All operations were rejected"
+                    appliedOperations: []
+                    pendingOperations: []
+                    rejectedOperations:
+                      - vaultAccountId: "1"
+                        tagId: "t10-already-attached"
+                        action: "attach"
+                        reason: "attachment_already_exists"
+                      - vaultAccountId: "2"
+                        tagId: "t11-being-edited"
+                        action: "attach"
+                        reason: "tag_being_edited"
+                      - vaultAccountId: "3"
+                        tagId: "t12-not-attached"
+                        action: "detach"
+                        reason: "attachment_does_not_exist"
+                response_scenario_7:
+                  summary: "🔄 Response: Pending request exists"
+                  description: "Response for Scenario 7 - operations rejected due to existing pending requests"
+                  value:
+                    status: "all_operations_rejected"
+                    message: "All operations rejected - pending requests exist"
+                    appliedOperations: []
+                    pendingOperations: []
+                    rejectedOperations:
+                      - vaultAccountId: "1"
+                        tagId: "t13-has-pending-attach"
+                        action: "attach"
+                        reason: "pending_request_exists"
+                      - vaultAccountId: "2"
+                        tagId: "t13-has-pending-attach"
+                        action: "attach"
+                        reason: "pending_request_exists"
+                      - vaultAccountId: "1"
+                        tagId: "t14-has-pending-detach"
+                        action: "detach"
+                        reason: "pending_request_exists"
+                      - vaultAccountId: "2"
+                        tagId: "t14-has-pending-detach"
+                        action: "detach"
+                        reason: "pending_request_exists"
+                response_scenario_8:
+                  summary: "🔍 Response: Tags not found"
+                  description: "Response for Scenario 8 - operations rejected due to non-existent tags"
+                  value:
+                    status: "all_operations_rejected"
+                    message: "All operations rejected - tags not found"
+                    appliedOperations: []
+                    pendingOperations: []
+                    rejectedOperations:
+                      - vaultAccountId: "1"
+                        tagId: "non-existent-tag-1"
+                        action: "attach"
+                        reason: "tag_does_not_exist"
+                      - vaultAccountId: "1"
+                        tagId: "non-existent-tag-2"
+                        action: "attach"
+                        reason: "tag_does_not_exist"
+                      - vaultAccountId: "2"
+                        tagId: "non-existent-tag-1"
+                        action: "attach"
+                        reason: "tag_does_not_exist"
+                      - vaultAccountId: "2"
+                        tagId: "non-existent-tag-2"
+                        action: "attach"
+                        reason: "tag_does_not_exist"
+                      - vaultAccountId: "1"
+                        tagId: "also-not-found"
+                        action: "detach"
+                        reason: "tag_does_not_exist"
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              examples:
+                response_scenario_6:
+                  summary: "⚠️ Response: Input validation errors (multiple issues)"
+                  description: "Response for Scenario 6 - comprehensive validation failure"
+                  value:
+                    error: "validation_failed"
+                    message: "Input validation failed"
+                    details:
+                      - field: "vaultAccountIds"
+                        error: "invalid_vault_ids"
+                        message: "Vault account IDs must be numeric strings"
+                        invalidVaultIds: ["invalid-vault"]
+                      - field: "tagIdsToAttach"
+                        error: "array_too_large"
+                        message: "Maximum 3 tags allowed, got 5"
+                        value: ["t1-too", "t2-many", "t3-tags", "t4-here", "t5-error"]
+                      - field: "tags"
+                        error: "conflicting_operations"
+                        message: "Tags cannot appear in both attach and detach arrays"
+                        conflictingTags: ["t4-protected"]
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                server_error:
+                  summary: "💥 Internal server error"
+                  description: "Server encountered an error while processing the request"
+                  value:
+                    error: "internal_server_error"
+                    message: "An internal error occurred while processing the request"
+                    details:
+                      errorCode: "INTERNAL_ERROR_001"
+                      timestamp: "2024-01-15T10:30:00Z"
+                      requestId: "req-abc123def456"
+
+components:
+  schemas:
+    BatchTagRequest:
+      type: object
+      required:
+        - vaultAccountIds
+        - tagIdsToAttach
+        - tagIdsToDetach
+      properties:
+        vaultAccountIds:
+          type: array
+          items:
+            type: string
+            pattern: '^[0-9]+$'
+          maxItems: 10
+          minItems: 1
+          description: Array of vault account IDs (numeric strings)
+          example: ["1", "2", "3"]
+        tagIdsToAttach:
+          type: array
+          items:
+            type: string
+          maxItems: 3
+          description: Array of tag IDs to attach (maximum 3)
+          example: ["compliance", "high-priority"]
+        tagIdsToDetach:
+          type: array
+          items:
+            type: string
+          maxItems: 3
+          description: Array of tag IDs to detach (maximum 3)
+          example: ["temporary", "review-needed"]
+
+    BatchTagResponse:
+      type: object
+      required:
+        - status
+        - message
+        - appliedOperations
+        - pendingOperations
+        - rejectedOperations
+      properties:
+        status:
+          type: string
+          enum:
+            - "all_applied"
+            - "all_pending"
+            - "all_rejected"
+            - "mixed_results"
+          description: Overall status of the batch operation
+        message:
+          type: string
+          description: Human-readable summary of the operation results
+          example: "2 applied, 1 pending approval, 1 rejected"
+        appliedOperations:
+          type: array
+          items:
+            $ref: '#/components/schemas/AppliedOperation'
+          description: Operations that were applied immediately
+        pendingOperations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PendingOperation'
+          description: Operations that require approval (protected tags)
+        rejectedOperations:
+          type: array
+          items:
+            $ref: '#/components/schemas/RejectedOperation'
+          description: Operations that were rejected during processing
+
+    AppliedOperation:
+      type: object
+      required:
+        - vaultAccountId
+        - tagId
+        - action
+        - status
+      properties:
+        vaultAccountId:
+          type: string
+          description: Vault account ID
+          example: "1"
+        tagId:
+          type: string
+          description: Tag ID
+          example: "general-use"
+        action:
+          type: string
+          enum: ["attach", "detach"]
+          description: Operation type
+        status:
+          type: string
+          enum: ["final"]
+          description: Operation status (always 'final' for applied operations)
+
+    PendingOperation:
+      type: object
+      required:
+        - vaultAccountId
+        - tagId
+        - action
+        - status
+        - requestId
+      properties:
+        vaultAccountId:
+          type: string
+          description: Vault account ID
+          example: "1"
+        tagId:
+          type: string
+          description: Tag ID
+          example: "compliance"
+        action:
+          type: string
+          enum: ["attach", "detach"]
+          description: Operation type
+        status:
+          type: string
+          enum: ["pending"]
+          description: Operation status (always 'pending' for protected tag operations)
+        requestId:
+          type: string
+          pattern: '^REQ-[0-9]{6}$'
+          description: Request ID for approval workflow (same for all operations in single API call)
+          example: "REQ-123456"
+
+    RejectedOperation:
+      type: object
+      required:
+        - vaultAccountId
+        - tagId
+        - action
+        - reason
+      properties:
+        vaultAccountId:
+          type: string
+          description: Vault account ID
+          example: "1"
+        tagId:
+          type: string
+          description: Tag ID
+          example: "compliance"
+        action:
+          type: string
+          enum: ["attach", "detach"]
+          description: Operation type
+        reason:
+          type: string
+          enum:
+            - "capacity_exceeded"
+            - "attachment_already_exists"
+            - "attachment_does_not_exist"
+            - "pending_request_exists"
+            - "tag_does_not_exist"
+            - "tag_being_edited"
+          description: Reason for rejection
+          example: "capacity_exceeded"
+
+    ValidationError:
+      type: object
+      required:
+        - error
+        - message
+        - details
+      properties:
+        error:
+          type: string
+          enum: ["validation_failed"]
+          description: Error type
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Input validation failed"
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationDetail'
+          description: Detailed validation errors
+
+    ValidationDetail:
+      type: object
+      required:
+        - field
+        - error
+        - message
+      properties:
+        field:
+          type: string
+          description: Field that failed validation
+          example: "tagIdsToAttach"
+        error:
+          type: string
+          description: Error code
+          example: "array_too_large"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Maximum 3 tags allowed, got 5"
+        value:
+          description: Invalid value that caused the error
+        invalidVaultIds:
+          type: array
+          items:
+            type: string
+          description: List of invalid vault account IDs (for vault ID validation errors)
+        unavailableTags:
+          type: array
+          items:
+            type: string
+          description: List of unavailable tags (for tag-related validation errors)
+        conflictingTags:
+          type: array
+          items:
+            type: string
+          description: List of tags that appear in both arrays (for conflicting operations)
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          description: Additional error details
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from authentication endpoint
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Vault Account Tags
+    description: Operations for managing vault account tag attachments`;
+
+                // Mock response function to determine which response to return based on request
+                function getMockResponse(requestBody) {
+                    const { vaultAccountIds, tagIdsToAttach, tagIdsToDetach } = requestBody;
+                    
+                    console.log('Mock response for:', requestBody);
+                    
+                    // VALIDATION ERRORS (400) - First validation error found is returned
+                    
+                    // Check invalid vault IDs first
+                    if (vaultAccountIds && vaultAccountIds.some(id => !/^[0-9]+$/.test(id))) {
+                        return {
+                            status: 400,
+                            body: {
+                                error: "validation_failed",
+                                message: "Input validation failed",
+                                details: [{
+                                    field: "vaultAccountIds",
+                                    error: "invalid_vault_ids",
+                                    message: "Vault account IDs must be numeric strings",
+                                    invalidVaultIds: vaultAccountIds.filter(id => !/^[0-9]+$/.test(id))
+                                }]
+                            }
+                        };
+                    }
+                    
+                    // Check attach array size
+                    if (tagIdsToAttach && tagIdsToAttach.length > 3) {
+                        return {
+                            status: 400,
+                            body: {
+                                error: "validation_failed",
+                                message: "Input validation failed",
+                                details: [{
+                                    field: "tagIdsToAttach",
+                                    error: "array_too_large",
+                                    message: `Maximum 3 tags allowed, got ${tagIdsToAttach.length}`
+                                }]
+                            }
+                        };
+                    }
+                    
+                    // Check detach array size
+                    if (tagIdsToDetach && tagIdsToDetach.length > 3) {
+                        return {
+                            status: 400,
+                            body: {
+                                error: "validation_failed",
+                                message: "Input validation failed",
+                                details: [{
+                                    field: "tagIdsToDetach",
+                                    error: "array_too_large",
+                                    message: `Maximum 3 tags allowed, got ${tagIdsToDetach.length}`
+                                }]
+                            }
+                        };
+                    }
+                    
+                    // Check conflicting tags
+                    const conflictingTags = tagIdsToAttach?.filter(tag => tagIdsToDetach?.includes(tag)) || [];
+                    if (conflictingTags.length > 0) {
+                        return {
+                            status: 400,
+                            body: {
+                                error: "validation_failed",
+                                message: "Input validation failed",
+                                details: [{
+                                    field: "tags",
+                                    error: "conflicting_operations",
+                                    message: "Tags cannot appear in both attach and detach arrays",
+                                    conflictingTags: conflictingTags
+                                }]
+                            }
+                        };
+                    }
+                    
+                    // Check tags not found
+                    const allTags = [...(tagIdsToAttach || []), ...(tagIdsToDetach || [])];
+                    const notFoundTags = allTags.filter(tag => tag.includes('non-existent') || tag.includes('not-found'));
+                    if (notFoundTags.length > 0) {
+                        return {
+                            status: 400,
+                            body: {
+                                error: "validation_failed",
+                                message: "Input validation failed",
+                                details: [{
+                                    field: tagIdsToAttach?.some(tag => notFoundTags.includes(tag)) ? "tagIdsToAttach" : "tagIdsToDetach",
+                                    error: "tags_not_found",
+                                    message: "Referenced tags do not exist",
+                                    unavailableTags: notFoundTags
+                                }]
+                            }
+                        };
+                    }
+                    
+                    // Check tags being edited
+                    const beingEditedTags = allTags.filter(tag => tag.includes('being-edited') || tag.includes('being-modified'));
+                    if (beingEditedTags.length > 0) {
+                        return {
+                            status: 400,
+                            body: {
+                                error: "validation_failed",
+                                message: "Input validation failed",
+                                details: [{
+                                    field: tagIdsToAttach?.some(tag => beingEditedTags.includes(tag)) ? "tagIdsToAttach" : "tagIdsToDetach",
+                                    error: "tags_being_modified",
+                                    message: "Tags currently being edited cannot be used",
+                                    unavailableTags: beingEditedTags
+                                }]
+                            }
+                        };
+                    }
+                    
+                    // SUCCESS RESPONSES (200) - Only 4 status types
+                    
+                    // Scenario 1: All applied
+                    if (JSON.stringify(vaultAccountIds) === JSON.stringify(["1", "2"]) &&
+                        JSON.stringify(tagIdsToAttach) === JSON.stringify(["t1-non-protected", "t2-non-protected"]) &&
+                        JSON.stringify(tagIdsToDetach) === JSON.stringify(["t3-non-protected-old"])) {
+                        return {
+                            status: 200,
+                            body: {
+                                status: "all_applied",
+                                message: "5 applied",
+                                appliedOperations: [
+                                    { vaultAccountId: "1", tagId: "t1-non-protected", action: "attach", status: "final" },
+                                    { vaultAccountId: "1", tagId: "t2-non-protected", action: "attach", status: "final" },
+                                    { vaultAccountId: "2", tagId: "t1-non-protected", action: "attach", status: "final" },
+                                    { vaultAccountId: "2", tagId: "t2-non-protected", action: "attach", status: "final" },
+                                    { vaultAccountId: "1", tagId: "t3-non-protected-old", action: "detach", status: "final" }
+                                ],
+                                pendingOperations: [],
+                                rejectedOperations: []
+                            }
+                        };
+                    }
+
+                    // Scenario 2: All pending
+                    if (JSON.stringify(vaultAccountIds) === JSON.stringify(["1", "2"]) &&
+                        JSON.stringify(tagIdsToAttach) === JSON.stringify(["t4-protected", "t5-protected"]) &&
+                        JSON.stringify(tagIdsToDetach) === JSON.stringify(["t6-protected-old"])) {
+                        return {
+                            status: 200,
+                            body: {
+                                status: "all_pending",
+                                message: "5 pending",
+                                appliedOperations: [],
+                                pendingOperations: [
+                                    { vaultAccountId: "1", tagId: "t4-protected", action: "attach", status: "pending", requestId: "REQ-234567" },
+                                    { vaultAccountId: "1", tagId: "t5-protected", action: "attach", status: "pending", requestId: "REQ-234567" },
+                                    { vaultAccountId: "2", tagId: "t4-protected", action: "attach", status: "pending", requestId: "REQ-234567" },
+                                    { vaultAccountId: "2", tagId: "t5-protected", action: "attach", status: "pending", requestId: "REQ-234567" },
+                                    { vaultAccountId: "1", tagId: "t6-protected-old", action: "detach", status: "pending", requestId: "REQ-234567" }
+                                ],
+                                rejectedOperations: []
+                            }
+                        };
+                    }
+
+                    // Scenario 3: Mixed results
+                    if (JSON.stringify(vaultAccountIds) === JSON.stringify(["1", "2", "3"]) &&
+                        JSON.stringify(tagIdsToAttach) === JSON.stringify(["t1-non-protected", "t4-protected"]) &&
+                        JSON.stringify(tagIdsToDetach) === JSON.stringify(["t7-non-protected-temp"])) {
+                        return {
+                            status: 200,
+                            body: {
+                                status: "mixed_results",
+                                message: "2 applied, 1 pending, 4 rejected",
+                                appliedOperations: [
+                                    { vaultAccountId: "1", tagId: "t1-non-protected", action: "attach", status: "final" },
+                                    { vaultAccountId: "1", tagId: "t7-non-protected-temp", action: "detach", status: "final" }
+                                ],
+                                pendingOperations: [
+                                    { vaultAccountId: "2", tagId: "t4-protected", action: "attach", status: "pending", requestId: "REQ-345678" }
+                                ],
+                                rejectedOperations: [
+                                    { vaultAccountId: "3", tagId: "t1-non-protected", action: "attach", reason: "capacity_exceeded" },
+                                    { vaultAccountId: "3", tagId: "t4-protected", action: "attach", reason: "capacity_exceeded" },
+                                    { vaultAccountId: "2", tagId: "t1-non-protected", action: "attach", reason: "attachment_already_exists" },
+                                    { vaultAccountId: "2", tagId: "t7-non-protected-temp", action: "detach", reason: "attachment_does_not_exist" }
+                                ]
+                            }
+                        };
+                    }
+
+                    // Scenario 4: All rejected
+                    if (JSON.stringify(vaultAccountIds) === JSON.stringify(["1"]) &&
+                        JSON.stringify(tagIdsToAttach) === JSON.stringify(["t8-non-protected", "t9-non-protected"]) &&
+                        JSON.stringify(tagIdsToDetach) === JSON.stringify([])) {
+                        return {
+                            status: 200,
+                            body: {
+                                status: "all_rejected",
+                                message: "2 rejected",
+                                appliedOperations: [],
+                                pendingOperations: [],
+                                rejectedOperations: [
+                                    { vaultAccountId: "1", tagId: "t8-non-protected", action: "attach", reason: "capacity_exceeded" },
+                                    { vaultAccountId: "1", tagId: "t9-non-protected", action: "attach", reason: "capacity_exceeded" }
+                                ]
+                            }
+                        };
+                    }
+
+                    // Scenario 5: Server error - 500 Internal Server Error
+                    if (JSON.stringify(vaultAccountIds) === JSON.stringify(["1", "2"]) &&
+                        JSON.stringify(tagIdsToAttach) === JSON.stringify(["t1-non-protected", "t4-protected"]) &&
+                        JSON.stringify(tagIdsToDetach) === JSON.stringify(["t99-server-error"])) {
+                        return {
+                            status: 500,
+                            body: {
+                                error: "internal_server_error",
+                                message: "An internal error occurred while processing the request",
+                                details: {
+                                    errorCode: "INTERNAL_ERROR_001",
+                                    timestamp: new Date().toISOString(),
+                                    requestId: "req-" + Math.random().toString(36).substr(2, 12)
+                                }
+                            }
+                        };
+                    }
+
+                    // Scenario 6: All rejected - attachments already exist
+                    if (JSON.stringify(vaultAccountIds) === JSON.stringify(["1", "2"]) &&
+                        JSON.stringify(tagIdsToAttach) === JSON.stringify(["t10-already-attached", "t11-already-exists"]) &&
+                        JSON.stringify(tagIdsToDetach) === JSON.stringify([])) {
+                        return {
+                            status: 200,
+                            body: {
+                                status: "all_rejected",
+                                message: "4 rejected",
+                                appliedOperations: [],
+                                pendingOperations: [],
+                                rejectedOperations: [
+                                    { vaultAccountId: "1", tagId: "t10-already-attached", action: "attach", reason: "attachment_already_exists" },
+                                    { vaultAccountId: "1", tagId: "t11-already-exists", action: "attach", reason: "attachment_already_exists" },
+                                    { vaultAccountId: "2", tagId: "t10-already-attached", action: "attach", reason: "attachment_already_exists" },
+                                    { vaultAccountId: "2", tagId: "t11-already-exists", action: "attach", reason: "attachment_already_exists" }
+                                ]
+                            }
+                        };
+                    }
+
+                    // Scenario 7: All rejected - attachments don't exist
+                    if (JSON.stringify(vaultAccountIds) === JSON.stringify(["1", "2"]) &&
+                        JSON.stringify(tagIdsToAttach) === JSON.stringify([]) &&
+                        JSON.stringify(tagIdsToDetach) === JSON.stringify(["t12-not-attached", "t13-missing"])) {
+                        return {
+                            status: 200,
+                            body: {
+                                status: "all_rejected",
+                                message: "4 rejected",
+                                appliedOperations: [],
+                                pendingOperations: [],
+                                rejectedOperations: [
+                                    { vaultAccountId: "1", tagId: "t12-not-attached", action: "detach", reason: "attachment_does_not_exist" },
+                                    { vaultAccountId: "1", tagId: "t13-missing", action: "detach", reason: "attachment_does_not_exist" },
+                                    { vaultAccountId: "2", tagId: "t12-not-attached", action: "detach", reason: "attachment_does_not_exist" },
+                                    { vaultAccountId: "2", tagId: "t13-missing", action: "detach", reason: "attachment_does_not_exist" }
+                                ]
+                            }
+                        };
+                    }
+
+                    // Scenario 8: All rejected - pending requests exist
+                    if (JSON.stringify(vaultAccountIds) === JSON.stringify(["1", "2"]) &&
+                        JSON.stringify(tagIdsToAttach) === JSON.stringify(["t14-has-pending-attach"]) &&
+                        JSON.stringify(tagIdsToDetach) === JSON.stringify(["t15-has-pending-detach"])) {
+                        return {
+                            status: 200,
+                            body: {
+                                status: "all_rejected",
+                                message: "4 rejected",
+                                appliedOperations: [],
+                                pendingOperations: [],
+                                rejectedOperations: [
+                                    { vaultAccountId: "1", tagId: "t14-has-pending-attach", action: "attach", reason: "pending_request_exists" },
+                                    { vaultAccountId: "1", tagId: "t15-has-pending-detach", action: "detach", reason: "pending_request_exists" },
+                                    { vaultAccountId: "2", tagId: "t14-has-pending-attach", action: "attach", reason: "pending_request_exists" },
+                                    { vaultAccountId: "2", tagId: "t15-has-pending-detach", action: "detach", reason: "pending_request_exists" }
+                                ]
+                            }
+                        };
+                    }
+
+                    // Scenario 9: All rejected - capacity exceeded with mixed operations (entire vault removed)
+                    if (JSON.stringify(vaultAccountIds) === JSON.stringify(["1", "2"]) &&
+                        JSON.stringify(tagIdsToAttach) === JSON.stringify(["t16-will-exceed", "t17-capacity"]) &&
+                        JSON.stringify(tagIdsToDetach) === JSON.stringify(["t18-old-tag", "t19-remove-me"])) {
+                        return {
+                            status: 200,
+                            body: {
+                                status: "all_rejected",
+                                message: "8 rejected",
+                                appliedOperations: [],
+                                pendingOperations: [],
+                                rejectedOperations: [
+                                    // All operations for vault 1 rejected due to capacity
+                                    { vaultAccountId: "1", tagId: "t16-will-exceed", action: "attach", reason: "capacity_exceeded" },
+                                    { vaultAccountId: "1", tagId: "t17-capacity", action: "attach", reason: "capacity_exceeded" },
+                                    { vaultAccountId: "1", tagId: "t18-old-tag", action: "detach", reason: "capacity_exceeded" },
+                                    { vaultAccountId: "1", tagId: "t19-remove-me", action: "detach", reason: "capacity_exceeded" },
+                                    // All operations for vault 2 rejected due to capacity  
+                                    { vaultAccountId: "2", tagId: "t16-will-exceed", action: "attach", reason: "capacity_exceeded" },
+                                    { vaultAccountId: "2", tagId: "t17-capacity", action: "attach", reason: "capacity_exceeded" },
+                                    { vaultAccountId: "2", tagId: "t18-old-tag", action: "detach", reason: "capacity_exceeded" },
+                                    { vaultAccountId: "2", tagId: "t19-remove-me", action: "detach", reason: "capacity_exceeded" }
+                                ]
+                            }
+                        };
+                    }
+
+                    // Fallback for custom inputs
+                    return {
+                        status: 200,
+                        body: {
+                            status: "all_applied",
+                            message: "1 applied",
+                            appliedOperations: [
+                                { vaultAccountId: (vaultAccountIds && vaultAccountIds[0]) || "1", tagId: (tagIdsToAttach && tagIdsToAttach[0]) || "unknown-tag", action: "attach", status: "final" }
+                            ],
+                            pendingOperations: [],
+                            rejectedOperations: []
+                        }
+                    };
+                }
+
+                const ui = SwaggerUIBundle({
+                    spec: jsyaml.load(yamlSpec),
+                    dom_id: '#swagger-ui',
+                    deepLinking: true,
+                    presets: [
+                        SwaggerUIBundle.presets.apis,
+                        SwaggerUIStandalonePreset
+                    ],
+                    plugins: [
+                        SwaggerUIBundle.plugins.DownloadUrl
+                    ],
+                    layout: "StandaloneLayout",
+                    defaultModelsExpandDepth: 2,
+                    defaultModelExpandDepth: 2,
+                    docExpansion: "list",
+                    operationsSorter: "alpha",
+                    filter: false,
+                    tryItOutEnabled: true,
+                    showMutatedRequest: false,
+                    showRequestHeaders: true,
+                    showCommonExtensions: true,
+                    requestSnippets: {
+                        generators: {
+                            "curl_bash": {
+                                title: "cURL (bash)",
+                                syntax: "bash"
+                            },
+                            "javascript_fetch": {
+                                title: "JavaScript (fetch)",
+                                syntax: "javascript"
+                            }
+                        }
+                    },
+                    onComplete: function() {
+                        console.log('Swagger UI loaded successfully');
+                        
+                        // Override the execute function to return mock responses
+                        const originalFetch = window.fetch;
+                        window.fetch = function(url, options) {
+                            console.log('Fetch intercepted:', url, options);
+                            
+                            if (url.includes('/vault/accounts/tags') && options && options.method === 'POST') {
+                                let requestBody;
+                                try {
+                                    requestBody = JSON.parse(options.body);
+                                } catch (e) {
+                                    return Promise.resolve(new Response(JSON.stringify({
+                                        error: "validation_failed",
+                                        message: "Invalid JSON format",
+                                        details: [{
+                                            field: "body",
+                                            error: "invalid_json",
+                                            message: "Request body must be valid JSON"
+                                        }]
+                                    }), {
+                                        status: 400,
+                                        statusText: 'Bad Request',
+                                        headers: new Headers({'content-type': 'application/json'})
+                                    }));
+                                }
+
+                                const mockResponse = getMockResponse(requestBody);
+                                
+                                return Promise.resolve(new Response(JSON.stringify(mockResponse.body), {
+                                    status: mockResponse.status,
+                                    statusText: mockResponse.status < 400 ? 'OK' : 'Bad Request',
+                                    headers: new Headers({'content-type': 'application/json'})
+                                }));
+                            }
+                            
+                            // Fall back to original fetch for other requests
+                            return originalFetch.apply(this, arguments);
+                        };
+                        
+                        // Custom styling after load
+                        setTimeout(function() {
+                            // Add custom classes or styling here
+                            const operations = document.querySelectorAll('.opblock');
+                            operations.forEach(op => {
+                                op.style.marginBottom = '20px';
+                            });
+                        }, 500);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error initializing Swagger UI:', error);
+                document.getElementById('swagger-ui').innerHTML = `
+                    <div style="text-align: center; padding: 50px; color: #ef4444;">
+                        <h3>⚠️ Initialization Error</h3>
+                        <p>Failed to initialize the API documentation viewer.</p>
+                        <p style="font-size: 14px; color: #6b7280;">Please check the console for more details.</p>
+                    </div>
+                `;
+            }
+        };
+    </script>
+</body>
+</html>

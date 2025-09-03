@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vault Account Tagging API Documentation</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui.css" />
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+
+        *,
+        *:before,
+        *:after {
+            box-sizing: inherit;
+        }
+
+        body {
+            margin: 0;
+            background: #fafafa;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        .header {
+            background: #1f2937;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+
+        .header p {
+            margin: 5px 0 0 0;
+            opacity: 0.8;
+            font-size: 14px;
+        }
+
+        .navigation {
+            background: white;
+            padding: 15px 0;
+            text-align: center;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .navigation a {
+            display: inline-block;
+            margin: 0 15px;
+            padding: 8px 16px;
+            text-decoration: none;
+            color: #3b82f6;
+            border: 1px solid #3b82f6;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .navigation a:hover {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .navigation a.active {
+            background-color: #1f2937;
+            border-color: #1f2937;
+            color: white;
+        }
+
+        #swagger-ui {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Custom Swagger UI styling */
+        .swagger-ui .topbar {
+            display: none;
+        }
+
+        .swagger-ui .info {
+            margin: 30px 0;
+        }
+
+        .swagger-ui .info .title {
+            color: #1f2937;
+        }
+
+        /* Enhance the operation blocks */
+        .swagger-ui .opblock.opblock-post {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .swagger-ui .opblock.opblock-post .opblock-summary-method {
+            background: #10b981;
+        }
+
+        /* Custom example styling */
+        .swagger-ui .examples-select {
+            margin-bottom: 10px;
+        }
+
+        /* Response examples styling */
+        .swagger-ui .response-col_status {
+            font-weight: bold;
+        }
+
+        .swagger-ui .response-col_status.response-200 {
+            color: #10b981;
+        }
+
+        .swagger-ui .response-col_status.response-400 {
+            color: #ef4444;
+        }
+
+        /* Enhance example selection styling */
+        .swagger-ui .examples-select {
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            border: 2px solid #10b981;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .swagger-ui .examples-select select {
+            background: transparent;
+            border: none;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        /* Make Try it out button more prominent */
+        .swagger-ui .btn.try-out__btn {
+            background: #10b981 !important;
+            color: white !important;
+            border: 2px solid #10b981 !important;
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .swagger-ui .btn.try-out__btn:hover {
+            background: #0f766e !important;
+            border-color: #0f766e !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Execute button styling */
+        .swagger-ui .btn.execute {
+            background: #3b82f6 !important;
+            border-color: #3b82f6 !important;
+            font-weight: 600;
+            padding: 12px 32px;
+            border-radius: 8px;
+        }
+
+        .swagger-ui .btn.execute:hover {
+            background: #2563eb !important;
+            border-color: #2563eb !important;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px 0;
+            text-align: center;
+            margin-top: 40px;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .footer p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        /* Loading indicator */
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #6b7280;
+        }
+
+        .loading::after {
+            content: "";
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 50%;
+            border-top-color: #3b82f6;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .navigation a {
+                display: block;
+                margin: 5px 15px;
+            }
+
+            #swagger-ui {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔥 Vault Account Tagging API</h1>
+        <p>Comprehensive API documentation with examples and validation rules</p>
+    </div>
+
+    <div class="navigation">
+        <a href="./tagging-workflow-v2.html">📊 Interactive Simulator</a>
+        <a href="./tagging-api-docs.html" class="active">📚 API Documentation</a>
+        <a href="./tagging-api.yaml" target="_blank">📄 OpenAPI Spec</a>
+        <a href="https://github.com/orgranit/tagging-demo" target="_blank">💻 GitHub Repository</a>
+    </div>
+
+    <div id="swagger-ui">
+        <div class="loading">Loading API documentation...</div>
+    </div>
+
+    <div class="footer">
+        <p>
+            Generated from OpenAPI 3.0.3 specification • 
+            <a href="https://fireblocks.com" target="_blank" style="color: #3b82f6;">Fireblocks</a> • 
+            Last updated: <span id="last-updated"></span>
+        </p>
+    </div>
+
+    <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-standalone-preset.js"></script>
+    <script src="https://unpkg.com/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    <script>
+        // Set last updated date
+        document.getElementById('last-updated').textContent = new Date().toLocaleDateString();
+
+        // Initialize Swagger UI
+        window.onload = function() {
+            try {
+                // Embedded YAML specification
+                const yamlSpec = `openapi: 3.0.3
+info:
+  title: Vault Account Tagging API
+  description: |
+    API for managing vault account tag attachments with support for protected tags, 
+    capacity constraints, and approval workflows.
+    
+    ## Key Features
+    - **Protected vs Non-Protected Tags**: Protected tags require approval, non-protected apply immediately
+    - **Capacity Management**: Maximum 3 attachments per vault account
+    - **Batch Operations**: Single API call for multiple vault accounts and tags
+    - **Comprehensive Validation**: Input validation with detailed error responses
+    
+    ## 🎯 Interactive Examples
+    
+    This documentation includes **6 comprehensive scenarios** with pre-filled request examples:
+    
+    - 🟢 **Scenario 1**: All operations applied immediately (non-protected tags)
+    - 🟡 **Scenario 2**: All operations require approval (protected tags)  
+    - 🔀 **Scenario 3**: Mixed results (applied + pending + rejected)
+    - 🚫 **Scenario 4**: Operations rejected due to capacity limits
+    - ❌ **Scenario 5**: All operations rejected (various reasons)
+    - ⚠️ **Scenario 6**: Input validation errors (400 response)
+    
+    **How to use:** 
+    1. Click "Try it out" on the endpoint below
+    2. Select any scenario from the "Example" dropdown  
+    3. Click "Execute" to see the expected response
+    4. Modify the request to test your own scenarios!
+  version: 1.0.0
+  contact:
+    name: Fireblocks API Team
+servers:
+  - url: https://api.fireblocks.io/v1
+    description: Production server
+  - url: https://sandbox-api.fireblocks.io/v1  
+    description: Sandbox server
+  - url: https://mock-api.fireblocks.io/v1
+    description: Mock server for testing (returns predefined responses based on input scenarios)
+
+paths:
+  /vault/accounts/tags:
+    post:
+      summary: Batch attach/detach tags to vault accounts
+      description: |
+        Attach and/or detach tags from multiple vault accounts in a single operation.
+        
+        **Processing Logic:**
+        1. **Input Validation**: Validates arrays, tag existence, and constraints
+        2. **Capacity Check**: Ensures vault accounts don't exceed 3 total attachments
+        3. **Operation Processing**: Handles protected vs non-protected tags differently
+        4. **Response Generation**: Returns applied, pending, and rejected operations
+      operationId: batchUpdateVaultAccountTags
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchTagRequest'
+            examples:
+              scenario_1_all_applied:
+                summary: "🟢 Scenario 1: All operations applied (non-protected tags)"
+                description: "Non-protected tags that apply immediately"
+                value:
+                  vaultAccountIds: ["1", "2"]
+                  tagIdsToAttach: ["general-use", "high-priority"]
+                  tagIdsToDetach: ["old-tag"]
+              scenario_2_all_pending:
+                summary: "🟡 Scenario 2: All pending approval (protected tags)"
+                description: "Protected tags that require approval"
+                value:
+                  vaultAccountIds: ["1", "2"]
+                  tagIdsToAttach: ["compliance", "kyc-required"]
+                  tagIdsToDetach: ["sensitive-data"]
+              scenario_3_mixed_results:
+                summary: "🔀 Scenario 3: Mixed results (applied + pending + rejected)"
+                description: "Combination of protected, non-protected, and rejected operations"
+                value:
+                  vaultAccountIds: ["1", "2", "3"]
+                  tagIdsToAttach: ["general-use", "compliance"]
+                  tagIdsToDetach: ["temporary"]
+              scenario_4_capacity_exceeded:
+                summary: "🚫 Scenario 4: Capacity exceeded (vault already has 3 tags)"
+                description: "Vault account 1 already has 3 attachments, trying to add more"
+                value:
+                  vaultAccountIds: ["1"]
+                  tagIdsToAttach: ["tag1", "tag2"]
+                  tagIdsToDetach: []
+              scenario_5_all_rejected:
+                summary: "❌ Scenario 5: All operations rejected"
+                description: "Various rejection reasons (already exists, doesn't exist, etc.)"
+                value:
+                  vaultAccountIds: ["1", "2"]
+                  tagIdsToAttach: ["compliance"]
+                  tagIdsToDetach: ["non-existent-tag"]
+              scenario_6_validation_errors:
+                summary: "⚠️ Scenario 6: Input validation errors"
+                description: "Invalid input that triggers validation errors (will return 400)"
+                value:
+                  vaultAccountIds: ["abc", "xyz"]
+                  tagIdsToAttach: ["tag1", "tag2", "tag3", "tag4", "tag5"]
+                  tagIdsToDetach: ["compliance", "compliance"]`;
+
+                const ui = SwaggerUIBundle({
+                    spec: jsyaml.load(yamlSpec),
+                            dom_id: '#swagger-ui',
+                            deepLinking: true,
+                            presets: [
+                                SwaggerUIBundle.presets.apis,
+                                SwaggerUIStandalonePreset
+                            ],
+                            plugins: [
+                                SwaggerUIBundle.plugins.DownloadUrl
+                            ],
+                            layout: "StandaloneLayout",
+                            defaultModelsExpandDepth: 2,
+                            defaultModelExpandDepth: 2,
+                            docExpansion: "list",
+                            operationsSorter: "alpha",
+                            filter: false,
+                            tryItOutEnabled: true,
+                            showRequestHeaders: true,
+                            showCommonExtensions: true,
+                            requestSnippetsEnabled: true,
+                            requestSnippets: {
+                                generators: {
+                                    "curl_bash": {
+                                        title: "cURL (bash)",
+                                        syntax: "bash"
+                                    },
+                                    "javascript_fetch": {
+                                        title: "JavaScript (fetch)",
+                                        syntax: "javascript"
+                                    }
+                                }
+                            },
+                            requestInterceptor: function(request) {
+                                // Add custom headers or modify requests here if needed
+                                return request;
+                            },
+                            responseInterceptor: function(response) {
+                                // Handle responses here if needed
+                                return response;
+                            },
+                            onComplete: function() {
+                                console.log('Swagger UI loaded successfully');
+                                
+                                // Custom styling after load
+                                setTimeout(function() {
+                                    // Add custom classes or styling here
+                                    const operations = document.querySelectorAll('.opblock');
+                                    operations.forEach(op => {
+                                        op.style.marginBottom = '20px';
+                                    });
+                                }, 500);
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Failed to load API specification:', error);
+                        document.getElementById('swagger-ui').innerHTML = `
+                            <div style="text-align: center; padding: 50px; color: #ef4444;">
+                                <h3>⚠️ Failed to Load API Documentation</h3>
+                                <p>Could not load the OpenAPI specification file.</p>
+                                <p style="font-size: 14px; color: #6b7280;">Error: ${error.message || 'Unknown error'}</p>
+                                <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    Try Again
+                                </button>
+                            </div>
+                        `;
+                    });
+
+                // Add keyboard shortcuts
+                document.addEventListener('keydown', function(e) {
+                    // Ctrl/Cmd + K to focus search (if search is enabled)
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                        e.preventDefault();
+                        const searchInput = document.querySelector('.download-url-input');
+                        if (searchInput) {
+                            searchInput.focus();
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error initializing Swagger UI:', error);
+                document.getElementById('swagger-ui').innerHTML = `
+                    <div style="text-align: center; padding: 50px; color: #ef4444;">
+                        <h3>⚠️ Initialization Error</h3>
+                        <p>Failed to initialize the API documentation viewer.</p>
+                        <p style="font-size: 14px; color: #6b7280;">Please check the console for more details.</p>
+                    </div>
+                `;
+            }
+        };
+
+        // Add some interactive features
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add smooth scrolling for anchor links
+            document.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A' && e.target.getAttribute('href').startsWith('#')) {
+                    e.preventDefault();
+                    const targetId = e.target.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

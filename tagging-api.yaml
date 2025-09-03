@@ -1,0 +1,569 @@
+openapi: 3.0.3
+info:
+  title: Vault Account Tagging API
+  description: |
+    API for managing vault account tag attachments with support for protected tags, 
+    capacity constraints, and approval workflows.
+    
+    ## Key Features
+    - **Protected vs Non-Protected Tags**: Protected tags require approval, non-protected apply immediately
+    - **Capacity Management**: Maximum 3 attachments per vault account
+    - **Batch Operations**: Single API call for multiple vault accounts and tags
+    - **Comprehensive Validation**: Input validation with detailed error responses
+    
+    ## 🎯 Interactive Examples
+    
+    This documentation includes **6 comprehensive scenarios** with pre-filled request examples:
+    
+    - 🟢 **Scenario 1**: All operations applied immediately (non-protected tags)
+    - 🟡 **Scenario 2**: All operations require approval (protected tags)  
+    - 🔀 **Scenario 3**: Mixed results (applied + pending + rejected)
+    - 🚫 **Scenario 4**: Operations rejected due to capacity limits
+    - ❌ **Scenario 5**: All operations rejected (various reasons)
+    - ⚠️ **Scenario 6**: Input validation errors (400 response)
+    
+    **How to use:** 
+    1. Click "Try it out" on the endpoint below
+    2. Select any scenario from the "Example" dropdown  
+    3. Click "Execute" to see the expected response
+    4. Modify the request to test your own scenarios!
+  version: 1.0.0
+  contact:
+    name: Fireblocks API Team
+servers:
+  - url: https://api.fireblocks.io/v1
+    description: Production server
+  - url: https://sandbox-api.fireblocks.io/v1  
+    description: Sandbox server
+  - url: https://mock-api.fireblocks.io/v1
+    description: Mock server for testing (returns predefined responses based on input scenarios)
+
+paths:
+  /vault/accounts/tags:
+    post:
+      summary: Batch attach/detach tags to vault accounts
+      description: |
+        Attach and/or detach tags from multiple vault accounts in a single operation.
+        
+        **Processing Logic:**
+        1. **Input Validation**: Validates arrays, tag existence, and constraints
+        2. **Capacity Check**: Ensures vault accounts don't exceed 3 total attachments
+        3. **Operation Processing**: Handles protected vs non-protected tags differently
+        4. **Response Generation**: Returns applied, pending, and rejected operations
+      operationId: batchUpdateVaultAccountTags
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchTagRequest'
+            examples:
+              scenario_1_all_applied:
+                summary: "🟢 Scenario 1: All operations applied (non-protected tags)"
+                description: "Non-protected tags that apply immediately"
+                value:
+                  vaultAccountIds: ["1", "2"]
+                  tagIdsToAttach: ["general-use", "high-priority"]
+                  tagIdsToDetach: ["old-tag"]
+              scenario_2_all_pending:
+                summary: "🟡 Scenario 2: All pending approval (protected tags)"
+                description: "Protected tags that require approval"
+                value:
+                  vaultAccountIds: ["1", "2"]
+                  tagIdsToAttach: ["compliance", "kyc-required"]
+                  tagIdsToDetach: ["sensitive-data"]
+              scenario_3_mixed_results:
+                summary: "🔀 Scenario 3: Mixed results (applied + pending + rejected)"
+                description: "Combination of protected, non-protected, and rejected operations"
+                value:
+                  vaultAccountIds: ["1", "2", "3"]
+                  tagIdsToAttach: ["general-use", "compliance"]
+                  tagIdsToDetach: ["temporary"]
+              scenario_4_capacity_exceeded:
+                summary: "🚫 Scenario 4: Capacity exceeded (vault already has 3 tags)"
+                description: "Vault account 1 already has 3 attachments, trying to add more"
+                value:
+                  vaultAccountIds: ["1"]
+                  tagIdsToAttach: ["tag1", "tag2"]
+                  tagIdsToDetach: []
+              scenario_5_all_rejected:
+                summary: "❌ Scenario 5: All operations rejected"
+                description: "Various rejection reasons (already exists, doesn't exist, etc.)"
+                value:
+                  vaultAccountIds: ["1", "2"]
+                  tagIdsToAttach: ["compliance"]
+                  tagIdsToDetach: ["non-existent-tag"]
+              scenario_6_validation_errors:
+                summary: "⚠️ Scenario 6: Input validation errors"
+                description: "Invalid input that triggers validation errors (will return 400)"
+                value:
+                  vaultAccountIds: ["abc", "xyz"]
+                  tagIdsToAttach: ["tag1", "tag2", "tag3", "tag4", "tag5"]
+                  tagIdsToDetach: ["compliance", "compliance"]
+      responses:
+        '200':
+          description: Operations processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchTagResponse'
+              examples:
+                response_scenario_1:
+                  summary: "🟢 Response: All operations applied immediately"
+                  description: "Response for Scenario 1 - non-protected tags"
+                  value:
+                    status: "success"
+                    message: "All valid operations applied successfully"
+                    appliedOperations:
+                      - vaultAccountId: "1"
+                        tagId: "general-use"
+                        action: "attach"
+                        status: "final"
+                      - vaultAccountId: "1"
+                        tagId: "high-priority"
+                        action: "attach"
+                        status: "final"
+                      - vaultAccountId: "2"
+                        tagId: "general-use"
+                        action: "attach"
+                        status: "final"
+                      - vaultAccountId: "2"
+                        tagId: "high-priority"
+                        action: "attach"
+                        status: "final"
+                      - vaultAccountId: "1"
+                        tagId: "old-tag"
+                        action: "detach"
+                        status: "final"
+                    pendingOperations: []
+                    rejectedOperations: []
+                response_scenario_2:
+                  summary: "🟡 Response: All operations require approval"
+                  description: "Response for Scenario 2 - protected tags"
+                  value:
+                    status: "all_pending_approval"
+                    message: "All valid operations require approval (protected tags)"
+                    appliedOperations: []
+                    pendingOperations:
+                      - vaultAccountId: "1"
+                        tagId: "compliance"
+                        action: "attach"
+                        status: "pending"
+                        requestId: "REQ-234567"
+                      - vaultAccountId: "1"
+                        tagId: "kyc-required"
+                        action: "attach"
+                        status: "pending"
+                        requestId: "REQ-234567"
+                      - vaultAccountId: "2"
+                        tagId: "compliance"
+                        action: "attach"
+                        status: "pending"
+                        requestId: "REQ-234567"
+                      - vaultAccountId: "2"
+                        tagId: "kyc-required"
+                        action: "attach"
+                        status: "pending"
+                        requestId: "REQ-234567"
+                      - vaultAccountId: "1"
+                        tagId: "sensitive-data"
+                        action: "detach"
+                        status: "pending"
+                        requestId: "REQ-234567"
+                    rejectedOperations: []
+                response_scenario_3:
+                  summary: "🔀 Response: Mixed results (applied + pending + rejected)"
+                  description: "Response for Scenario 3 - combination of all result types"
+                  value:
+                    status: "mixed_results"
+                    message: "2 applied, 1 pending approval, 4 rejected"
+                    appliedOperations:
+                      - vaultAccountId: "1"
+                        tagId: "general-use"
+                        action: "attach"
+                        status: "final"
+                      - vaultAccountId: "1"
+                        tagId: "temporary"
+                        action: "detach"
+                        status: "final"
+                    pendingOperations:
+                      - vaultAccountId: "2"
+                        tagId: "compliance"
+                        action: "attach"
+                        status: "pending"
+                        requestId: "REQ-345678"
+                    rejectedOperations:
+                      - vaultAccountId: "3"
+                        tagId: "general-use"
+                        action: "attach"
+                        reason: "capacity_exceeded"
+                      - vaultAccountId: "3"
+                        tagId: "compliance"
+                        action: "attach"
+                        reason: "capacity_exceeded"
+                      - vaultAccountId: "2"
+                        tagId: "general-use"
+                        action: "attach"
+                        reason: "attachment_already_exists"
+                      - vaultAccountId: "2"
+                        tagId: "temporary"
+                        action: "detach"
+                        reason: "attachment_does_not_exist"
+                response_scenario_4:
+                  summary: "🚫 Response: Operations rejected due to capacity limits"
+                  description: "Response for Scenario 4 - vault account already has 3 attachments"
+                  value:
+                    status: "all_operations_rejected"
+                    message: "All operations rejected due to capacity limits"
+                    appliedOperations: []
+                    pendingOperations: []
+                    rejectedOperations:
+                      - vaultAccountId: "1"
+                        tagId: "tag1"
+                        action: "attach"
+                        reason: "capacity_exceeded"
+                      - vaultAccountId: "1"
+                        tagId: "tag2"
+                        action: "attach"
+                        reason: "capacity_exceeded"
+                response_scenario_5:
+                  summary: "❌ Response: All operations rejected"
+                  description: "Response for Scenario 5 - various rejection reasons"
+                  value:
+                    status: "all_operations_rejected"
+                    message: "All operations were rejected"
+                    appliedOperations: []
+                    pendingOperations: []
+                    rejectedOperations:
+                      - vaultAccountId: "1"
+                        tagId: "compliance"
+                        action: "attach"
+                        reason: "attachment_already_exists"
+                      - vaultAccountId: "2"
+                        tagId: "non-existent-tag"
+                        action: "detach"
+                        reason: "attachment_does_not_exist"
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              examples:
+                response_scenario_6:
+                  summary: "⚠️ Response: Input validation errors (multiple issues)"
+                  description: "Response for Scenario 6 - comprehensive validation failure"
+                  value:
+                    error: "validation_failed"
+                    message: "Input validation failed"
+                    details:
+                      - field: "vaultAccountIds"
+                        error: "invalid_vault_ids"
+                        message: "Vault account IDs must be numeric strings"
+                        invalidVaultIds: ["abc", "xyz"]
+                      - field: "tagIdsToAttach"
+                        error: "array_too_large"
+                        message: "Maximum 3 tags allowed, got 5"
+                        value: ["tag1", "tag2", "tag3", "tag4", "tag5"]
+                      - field: "tags"
+                        error: "conflicting_operations"
+                        message: "Tags cannot appear in both attach and detach arrays"
+                        conflictingTags: ["compliance"]
+                array_too_large:
+                  summary: "Too many tags in array"
+                  value:
+                    error: "validation_failed"
+                    message: "Input validation failed"
+                    details:
+                      - field: "tagIdsToAttach"
+                        error: "array_too_large"
+                        message: "Maximum 3 tags allowed, got 5"
+                        value: ["t1", "t2", "t3", "t4", "t5"]
+                invalid_vault_ids:
+                  summary: "Invalid vault account IDs"
+                  value:
+                    error: "validation_failed"
+                    message: "Input validation failed"
+                    details:
+                      - field: "vaultAccountIds"
+                        error: "invalid_vault_ids"
+                        message: "Vault account IDs must be numeric strings"
+                        invalidVaultIds: ["abc", "xyz"]
+                conflicting_arrays:
+                  summary: "Same tag in both attach and detach arrays"
+                  value:
+                    error: "validation_failed"
+                    message: "Input validation failed"
+                    details:
+                      - field: "tags"
+                        error: "conflicting_operations"
+                        message: "Tags cannot appear in both attach and detach arrays"
+                        conflictingTags: ["compliance"]
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    BatchTagRequest:
+      type: object
+      required:
+        - vaultAccountIds
+        - tagIdsToAttach
+        - tagIdsToDetach
+      properties:
+        vaultAccountIds:
+          type: array
+          items:
+            type: string
+            pattern: '^[0-9]+$'
+          maxItems: 10
+          minItems: 1
+          description: Array of vault account IDs (numeric strings)
+          example: ["1", "2", "3"]
+        tagIdsToAttach:
+          type: array
+          items:
+            type: string
+          maxItems: 3
+          description: Array of tag IDs to attach (maximum 3)
+          example: ["compliance", "high-priority"]
+        tagIdsToDetach:
+          type: array
+          items:
+            type: string
+          maxItems: 3
+          description: Array of tag IDs to detach (maximum 3)
+          example: ["temporary", "review-needed"]
+
+    BatchTagResponse:
+      type: object
+      required:
+        - status
+        - message
+        - appliedOperations
+        - pendingOperations
+        - rejectedOperations
+      properties:
+        status:
+          type: string
+          enum:
+            - "success"
+            - "all_pending_approval"
+            - "partial_success_mixed_protection"
+            - "partial_success_with_rejections"
+            - "mixed_results"
+            - "pending_with_rejections"
+            - "all_operations_rejected"
+            - "no_operations_requested"
+          description: Overall status of the batch operation
+        message:
+          type: string
+          description: Human-readable summary of the operation results
+          example: "2 applied, 1 pending approval, 1 rejected"
+        appliedOperations:
+          type: array
+          items:
+            $ref: '#/components/schemas/AppliedOperation'
+          description: Operations that were applied immediately
+        pendingOperations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PendingOperation'
+          description: Operations that require approval (protected tags)
+        rejectedOperations:
+          type: array
+          items:
+            $ref: '#/components/schemas/RejectedOperation'
+          description: Operations that were rejected during processing
+
+    AppliedOperation:
+      type: object
+      required:
+        - vaultAccountId
+        - tagId
+        - action
+        - status
+      properties:
+        vaultAccountId:
+          type: string
+          description: Vault account ID
+          example: "1"
+        tagId:
+          type: string
+          description: Tag ID
+          example: "general-use"
+        action:
+          type: string
+          enum: ["attach", "detach"]
+          description: Operation type
+        status:
+          type: string
+          enum: ["final"]
+          description: Operation status (always 'final' for applied operations)
+
+    PendingOperation:
+      type: object
+      required:
+        - vaultAccountId
+        - tagId
+        - action
+        - status
+        - requestId
+      properties:
+        vaultAccountId:
+          type: string
+          description: Vault account ID
+          example: "1"
+        tagId:
+          type: string
+          description: Tag ID
+          example: "compliance"
+        action:
+          type: string
+          enum: ["attach", "detach"]
+          description: Operation type
+        status:
+          type: string
+          enum: ["pending"]
+          description: Operation status (always 'pending' for protected tag operations)
+        requestId:
+          type: string
+          pattern: '^REQ-[0-9]{6}$'
+          description: Request ID for approval workflow (same for all operations in single API call)
+          example: "REQ-123456"
+
+    RejectedOperation:
+      type: object
+      required:
+        - vaultAccountId
+        - tagId
+        - action
+        - reason
+      properties:
+        vaultAccountId:
+          type: string
+          description: Vault account ID
+          example: "1"
+        tagId:
+          type: string
+          description: Tag ID
+          example: "compliance"
+        action:
+          type: string
+          enum: ["attach", "detach"]
+          description: Operation type
+        reason:
+          type: string
+          enum:
+            - "capacity_exceeded"
+            - "attachment_already_exists"
+            - "attachment_does_not_exist"
+            - "pending_request_exists"
+            - "tag_does_not_exist"
+            - "tag_being_edited"
+          description: Reason for rejection
+          example: "capacity_exceeded"
+
+    ValidationError:
+      type: object
+      required:
+        - error
+        - message
+        - details
+      properties:
+        error:
+          type: string
+          enum: ["validation_failed"]
+          description: Error type
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Input validation failed"
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationDetail'
+          description: Detailed validation errors
+
+    ValidationDetail:
+      type: object
+      required:
+        - field
+        - error
+        - message
+      properties:
+        field:
+          type: string
+          description: Field that failed validation
+          example: "tagIdsToAttach"
+        error:
+          type: string
+          description: Error code
+          example: "array_too_large"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Maximum 3 tags allowed, got 5"
+        value:
+          description: Invalid value that caused the error
+        invalidVaultIds:
+          type: array
+          items:
+            type: string
+          description: List of invalid vault account IDs (for vault ID validation errors)
+        unavailableTags:
+          type: array
+          items:
+            type: string
+          description: List of unavailable tags (for tag-related validation errors)
+        conflictingTags:
+          type: array
+          items:
+            type: string
+          description: List of tags that appear in both arrays (for conflicting operations)
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          description: Additional error details
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from authentication endpoint
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Vault Account Tags
+    description: Operations for managing vault account tag attachments
