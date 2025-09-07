@@ -49,6 +49,11 @@
             font-size: 24px;
         }
 
+        .nav-link:hover {
+            background-color: #1565c0 !important;
+            color: white !important;
+        }
+
         h2 {
             color: #555;
             font-size: 18px;
@@ -1295,6 +1300,13 @@
 <body>
     <div class="container">
         <h1>Tagging Workflow Simulator V2</h1>
+        
+        <div style="background: white; border: 1px solid #e0e0e0; border-radius: 4px; padding: 15px; margin-bottom: 20px; text-align: center;">
+            <a href="./tagging-workflow-v2.html" class="nav-link" style="display: inline-block; margin: 0 10px; padding: 8px 16px; text-decoration: none; color: #1565c0; border: 1px solid #1565c0; border-radius: 4px; transition: all 0.2s ease; font-weight: 600; background-color: #1565c0; color: white;">📊 Interactive Simulator</a>
+            <a href="./tagging-api-docs-standalone.html" class="nav-link" style="display: inline-block; margin: 0 10px; padding: 8px 16px; text-decoration: none; color: #1565c0; border: 1px solid #1565c0; border-radius: 4px; transition: all 0.2s ease;">📚 API Documentation</a>
+            <a href="./vault-account-tagging-prd.html" class="nav-link" style="display: inline-block; margin: 0 10px; padding: 8px 16px; text-decoration: none; color: #1565c0; border: 1px solid #1565c0; border-radius: 4px; transition: all 0.2s ease;">📋 Product Requirements</a>
+        </div>
+
         <div class="behavior-section" onclick="showBehaviorModal()"
             style="background: #e3f2fd; border: 1px solid #90caf9; border-radius: 4px; padding: 10px; margin-bottom: 15px; font-size: 13px; color: #1565c0; cursor: pointer; transition: background-color 0.2s;"
             onmouseover="this.style.backgroundColor='#bbdefb'" onmouseout="this.style.backgroundColor='#e3f2fd'">
