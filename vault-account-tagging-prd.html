@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vault Account Tagging API - Product Requirements Document</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #1a1a1a;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        h1 { font-size: 2.5em; text-align: center; }
+        h2 { font-size: 1.8em; margin-top: 40px; }
+        h3 { font-size: 1.3em; margin-top: 30px; }
+        .scenario {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .scenario h4 {
+            color: #007acc;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .code {
+            background: #f1f3f4;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .validation { border-left: 4px solid #ffc107; }
+        .success { border-left: 4px solid #28a745; }
+        .rejection { border-left: 4px solid #dc3545; }
+        .error { border-left: 4px solid #fd7e14; }
+        ul { padding-left: 25px; }
+        li { margin: 8px 0; }
+        .nav-links {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .nav-links a {
+            margin: 0 15px;
+            color: #007acc;
+            text-decoration: none;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Vault Account Tagging API</h1>
+    <p style="text-align: center; font-size: 1.2em; color: #666;">Product Requirements Document</p>
+
+    <div class="nav-links">
+        <a href="./tagging-workflow-v2.html">🔗 Interactive Simulator</a>
+        <a href="./tagging-api-docs-standalone.html">🔗 API Documentation</a>
+    </div>
+
+    <h2>API Endpoint</h2>
+    <div class="code">POST /vault/accounts/tags
+Content-Type: application/json
+Authorization: Bearer {jwt_token}
+
+Request Schema:
+{
+  "vaultAccountIds": string[],     // 1-10 numeric strings  
+  "tagIdsToAttach": string[],      // 0-3 tag identifiers (3 in simulator, 20 in production)
+  "tagIdsToDetach": string[]       // 0-3 tag identifiers (3 in simulator, 20 in production)
+}
+
+Response Schema:
+{
+  "status": "all_applied" | "all_pending" | "mixed_results" | "all_rejected",
+  "message": string,
+  "appliedOperations": Operation[],
+  "pendingOperations": Operation[], 
+  "rejectedOperations": Operation[]
+}</div>
+
+    <h2>Validation Cases (HTTP 400)</h2>
+    <p><strong>Priority-based validation:</strong> Returns only the first validation error encountered.</p>
+
+    <div class="scenario validation">
+        <h4>1. Attach Array Size Violation</h4>
+        <p><strong>Rule:</strong> Maximum 3 tags in tagIdsToAttach array</p>
+        <p><strong>Note:</strong> Simulator/API docs use limit of 3 for simplicity, but production limit is 20</p>
+        <p><strong>Trigger:</strong> tagIdsToAttach.length > 3</p>
+        <div class="code">{
+  "error": "validation_failed",
+  "details": [{
+    "field": "tagIdsToAttach",
+    "error": "array_too_large", 
+    "message": "Maximum 3 tags allowed, got 5"
+  }]
+}</div>
+    </div>
+
+    <div class="scenario validation">
+        <h4>2. Detach Array Size Violation</h4>
+        <p><strong>Rule:</strong> Maximum 3 tags in tagIdsToDetach array</p>
+        <p><strong>Note:</strong> Simulator/API docs use limit of 3 for simplicity, but production limit is 20</p>
+        <p><strong>Trigger:</strong> tagIdsToDetach.length > 3</p>
+        <div class="code">{
+  "error": "validation_failed",
+  "details": [{
+    "field": "tagIdsToDetach",
+    "error": "array_too_large",
+    "message": "Maximum 3 tags allowed, got 4"
+  }]
+}</div>
+    </div>
+
+    <div class="scenario validation">
+        <h4>3. Conflicting Operations</h4>
+        <p><strong>Rule:</strong> Same tag cannot appear in both attach and detach arrays</p>
+        <p><strong>Logic:</strong> intersection(attach, detach) ≠ ∅</p>
+        <div class="code">{
+  "error": "validation_failed",
+  "details": [{
+    "field": "tags",
+    "error": "conflicting_operations",
+    "message": "Tags cannot appear in both arrays",
+    "conflictingTags": ["tag1", "tag2"]
+  }]
+}</div>
+    </div>
+
+    <div class="scenario validation">
+        <h4>4. Vault Account Existence</h4>
+        <p><strong>Rule:</strong> All vault account IDs must exist in system</p>
+        <p><strong>Check:</strong> Database lookup for each vault account ID</p>
+        <div class="code">{
+  "error": "validation_failed", 
+  "details": [{
+    "field": "vaultAccountIds",
+    "error": "vault_accounts_not_found",
+    "message": "Referenced vault accounts do not exist",
+    "invalidVaultIds": ["999", "1000"]
+  }]
+}</div>
+    </div>
+
+    <div class="scenario validation">
+        <h4>5. Tag Existence</h4>
+        <p><strong>Rule:</strong> All referenced tags must exist in system</p>
+        <p><strong>Check:</strong> Database lookup for each tag ID</p>
+        <div class="code">{
+  "error": "validation_failed",
+  "details": [{
+    "field": "tagIdsToAttach",
+    "error": "tags_not_found", 
+    "message": "Referenced tags do not exist",
+    "unavailableTags": ["non-existent-tag"]
+  }]
+}</div>
+    </div>
+
+    <div class="scenario validation">
+        <h4>6. Tag Availability</h4>
+        <p><strong>Rule:</strong> Tags currently under modification (pending edit/delete) cannot be used</p>
+        <p><strong>Check:</strong> Tag editing/deletion status in system</p>
+        <div class="code">{
+  "error": "validation_failed",
+  "details": [{
+    "field": "tagIdsToAttach",
+    "error": "tags_being_modified",
+    "message": "Tags currently being edited cannot be used", 
+    "unavailableTags": ["tag-being-edited"]
+  }]
+}</div>
+    </div>
+
+    <h2>Success Scenarios (HTTP 200)</h2>
+
+    <div class="scenario success">
+        <h4>Status: all_applied</h4>
+        <p><strong>Condition:</strong> All operations completed immediately</p>
+        <p><strong>Scenario:</strong> Non-protected tags only, no business rule violations</p>
+        <div class="code">{
+  "status": "all_applied",
+  "message": "5 applied",
+  "appliedOperations": [
+    {"vaultAccountId": "1", "tagId": "tag1", "action": "attach", "status": "final"}
+  ],
+  "pendingOperations": [],
+  "rejectedOperations": []
+}</div>
+    </div>
+
+    <div class="scenario success">
+        <h4>Status: all_pending</h4>
+        <p><strong>Condition:</strong> All operations require approval</p>
+        <p><strong>Scenario:</strong> Protected tags only, no business rule violations</p>
+        <div class="code">{
+  "status": "all_pending", 
+  "message": "3 pending",
+  "appliedOperations": [],
+  "pendingOperations": [
+    {"vaultAccountId": "1", "tagId": "protected-tag", "action": "attach", "status": "pending", "requestId": "REQ-123456"}
+  ],
+  "rejectedOperations": []
+}</div>
+    </div>
+
+    <div class="scenario success">
+        <h4>Status: mixed_results</h4>
+        <p><strong>Condition:</strong> Operations distributed across all categories</p>
+        <p><strong>Scenario:</strong> Combination of applied, pending, and rejected operations</p>
+        <div class="code">{
+  "status": "mixed_results",
+  "message": "2 applied, 1 pending, 3 rejected",
+  "appliedOperations": [...],
+  "pendingOperations": [...],
+  "rejectedOperations": [...]
+}</div>
+    </div>
+
+    <div class="scenario success">
+        <h4>Status: all_rejected</h4>
+        <p><strong>Condition:</strong> All operations failed business rule checks</p>
+        <p><strong>Scenarios:</strong> Capacity exceeded, conflicts, missing attachments</p>
+        <div class="code">{
+  "status": "all_rejected",
+  "message": "4 rejected", 
+  "appliedOperations": [],
+  "pendingOperations": [],
+  "rejectedOperations": [
+    {"vaultAccountId": "1", "tagId": "tag1", "action": "attach", "reason": "capacity_exceeded"}
+  ]
+}</div>
+    </div>
+
+    <h2>Business Rule Rejection Reasons</h2>
+
+    <div class="scenario rejection">
+        <h4>capacity_exceeded</h4>
+        <p><strong>Rule:</strong> Maximum 3 attachments per vault account</p>
+        <p><strong>Behavior:</strong> When vault would exceed limit, ALL operations (attach + detach) for that vault are rejected</p>
+        <p><strong>Example:</strong> Vault has 2 attachments, request tries to attach 2 more → 2+2=4 > 3 → ALL operations rejected</p>
+    </div>
+
+    <div class="scenario rejection">
+        <h4>attachment_already_exists</h4>
+        <p><strong>Rule:</strong> Cannot attach tag that's already attached to vault</p>
+        <p><strong>Applies to:</strong> Attach operations only</p>
+    </div>
+
+    <div class="scenario rejection">
+        <h4>attachment_does_not_exist</h4>
+        <p><strong>Rule:</strong> Cannot detach tag that's not currently attached to vault</p>
+        <p><strong>Applies to:</strong> Detach operations only</p>
+    </div>
+
+    <div class="scenario rejection">
+        <h4>pending_request_exists</h4>
+        <p><strong>Rule:</strong> Cannot create operation if pending approval already exists for same tag/vault combination</p>
+        <p><strong>Applies to:</strong> Both attach and detach operations</p>
+    </div>
+
+    <h2>Server Error (HTTP 500)</h2>
+
+    <div class="scenario error">
+        <h4>Internal Server Error</h4>
+        <p><strong>Trigger:</strong> Unexpected server-side processing failures</p>
+        <p><strong>Examples:</strong> Database connection loss, service timeouts</p>
+        <div class="code">{
+  "error": "internal_server_error",
+  "message": "An internal error occurred while processing the request",
+  "details": {
+    "errorCode": "INTERNAL_ERROR_001",
+    "timestamp": "2025-01-15T10:30:00Z",
+    "requestId": "req-abc123def456"
+  }
+}</div>
+    </div>
+
+    <h2>Key Business Logic</h2>
+    <ul>
+        <li><strong>Capacity Management:</strong> 3 attachment limit per vault account</li>
+        <li><strong>Entire Vault Rejection:</strong> If capacity exceeded, ALL operations for that vault rejected</li>
+        <li><strong>Protected vs Non-Protected:</strong> Protected tags require approval (pending), non-protected are immediate</li>
+        <li><strong>Request ID Consistency:</strong> All protected operations in single API call share same request ID</li>
+        <li><strong>Priority-Based Validation:</strong> Only first validation error returned</li>
+        <li><strong>Batch Processing:</strong> Multiple vaults and tags processed in single request</li>
+    </ul>
+
+    <h2>Edge Cases</h2>
+    <ul>
+        <li><strong>Mixed Capacity Impact:</strong> Some vaults exceed capacity, others don't → mixed_results</li>
+        <li><strong>Empty Arrays:</strong> Both attach and detach arrays cannot be empty</li>
+        <li><strong>Duplicate Tags in Request:</strong> Later duplicates get attachment_already_exists rejection</li>
+        <li><strong>Cross-Vault Processing:</strong> Each vault processed independently</li>
+        <li><strong>Maximum Scale:</strong> 10 vaults × 3 attach × 3 detach = 60 total operations (simulator), 10 vaults × 20 attach × 20 detach = 400 total operations (production)</li>
+        <li><strong>Concurrent Requests:</strong> Database locking prevents race conditions</li>
+    </ul>
+
+    <h2>Tag Management APIs</h2>
+
+    <h3>Edit Tag (PATCH)</h3>
+    <div class="code">PATCH /taggingService/tag/{id}
+Content-Type: application/json
+Authorization: Bearer {jwt_token}
+
+Request Schema:
+{
+  "name": string,           // Optional: New tag name
+  "description": string,    // Optional: New tag description
+  "protected": boolean      // Optional: Change protection status
+}
+
+Success Response (200):
+{
+  "id": string,
+  "name": string,
+  "description": string,
+  "protected": boolean,
+  "lastModified": string    // ISO 8601 timestamp
+}</div>
+
+    <div class="scenario validation">
+        <h4>Edit Tag Validation Cases</h4>
+        <p><strong>Tag Not Found (404):</strong> Tag ID does not exist</p>
+        <p><strong>Name Conflict (400):</strong> Tag name already exists for another tag</p>
+        <p><strong>Tag Has Pending Operations (400):</strong> Cannot edit tag with pending attach/detach operations</p>
+        <p><strong>Invalid Fields (400):</strong> Empty name, invalid boolean values</p>
+        <div class="code">{
+  "error": "tag_has_pending_operations",
+  "message": "Cannot edit tag with pending operations",
+  "details": {
+    "pendingOperations": 3
+  }
+}</div>
+    </div>
+
+    <h3>Delete Tag (DELETE)</h3>
+    <div class="code">DELETE /taggingService/tag/{id}
+Authorization: Bearer {jwt_token}
+
+Success Response (204): No content
+
+Error Response (400):
+{
+  "error": "tag_in_use",
+  "message": "Cannot delete tag with active attachments or pending operations",
+  "details": {
+    "activeAttachments": number,
+    "pendingOperations": number
+  }
+}</div>
+
+    <div class="scenario validation">
+        <h4>Delete Tag Validation Cases</h4>
+        <p><strong>Tag Not Found (404):</strong> Tag ID does not exist</p>
+        <p><strong>Tag In Use (400):</strong> Tag has active attachments to vault accounts</p>
+        <p><strong>Pending Operations (400):</strong> Tag has pending attach/detach operations</p>
+        <div class="code">{
+  "error": "tag_in_use",
+  "message": "Cannot delete tag with active attachments or pending operations",
+  "details": {
+    "activeAttachments": 5,
+    "pendingOperations": 2
+  }
+}</div>
+    </div>
+
+    <h2>Tag Management Business Rules</h2>
+    <ul>
+        <li><strong>Edit Restriction:</strong> Cannot edit tags with pending attach/detach operations</li>
+        <li><strong>Name Uniqueness:</strong> Tag names must be unique across the system</li>
+        <li><strong>Deletion Safety:</strong> Cannot delete tags with active attachments or pending operations</li>
+        <li><strong>Concurrent Safety:</strong> Edit/delete operations are locked during processing</li>
+    </ul>
+
+    <h2>Tag State Management</h2>
+    <ul>
+        <li><strong>Available:</strong> Tag can be used in attach/detach operations</li>
+        <li><strong>Being Modified:</strong> Tag is being edited - blocks new operations</li>
+        <li><strong>Being Deleted:</strong> Tag is being deleted - blocks all operations</li>
+        <li><strong>In Use:</strong> Tag has active attachments - blocks deletion</li>
+    </ul>
+
+    <p style="text-align: center; margin-top: 50px; color: #666;">
+        <strong>Implementation:</strong> 15 comprehensive scenarios available in interactive simulator and API documentation for vault tagging operations
+    </p>
+</body>
+</html>
