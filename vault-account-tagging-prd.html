@@ -82,8 +82,8 @@ Authorization: Bearer {jwt_token}
 Request Schema:
 {
   "vaultAccountIds": string[],     // 1-10 numeric strings  
-  "tagIdsToAttach": string[],      // 0-3 tag identifiers (3 in simulator, 20 in production)
-  "tagIdsToDetach": string[]       // 0-3 tag identifiers (3 in simulator, 20 in production)
+  "tagIdsToAttach": string[],      // 0-20 tag identifiers
+  "tagIdsToDetach": string[]       // 0-20 tag identifiers
 }
 
 Response Schema:
@@ -100,30 +100,28 @@ Response Schema:
 
     <div class="scenario validation">
         <h4>1. Attach Array Size Violation</h4>
-        <p><strong>Rule:</strong> Maximum 3 tags in tagIdsToAttach array</p>
-        <p><strong>Note:</strong> Simulator/API docs use limit of 3 for simplicity, but production limit is 20</p>
-        <p><strong>Trigger:</strong> tagIdsToAttach.length > 3</p>
+        <p><strong>Rule:</strong> Maximum 20 tags in tagIdsToAttach array</p>
+        <p><strong>Trigger:</strong> tagIdsToAttach.length > 20</p>
         <div class="code">{
   "error": "validation_failed",
   "details": [{
     "field": "tagIdsToAttach",
     "error": "array_too_large", 
-    "message": "Maximum 3 tags allowed, got 5"
+    "message": "Maximum 20 tags allowed, got 21"
   }]
 }</div>
     </div>
 
     <div class="scenario validation">
         <h4>2. Detach Array Size Violation</h4>
-        <p><strong>Rule:</strong> Maximum 3 tags in tagIdsToDetach array</p>
-        <p><strong>Note:</strong> Simulator/API docs use limit of 3 for simplicity, but production limit is 20</p>
-        <p><strong>Trigger:</strong> tagIdsToDetach.length > 3</p>
+        <p><strong>Rule:</strong> Maximum 20 tags in tagIdsToDetach array</p>
+        <p><strong>Trigger:</strong> tagIdsToDetach.length > 20</p>
         <div class="code">{
   "error": "validation_failed",
   "details": [{
     "field": "tagIdsToDetach",
     "error": "array_too_large",
-    "message": "Maximum 3 tags allowed, got 4"
+    "message": "Maximum 20 tags allowed, got 21"
   }]
 }</div>
     </div>
@@ -252,9 +250,9 @@ Response Schema:
 
     <div class="scenario rejection">
         <h4>capacity_exceeded</h4>
-        <p><strong>Rule:</strong> Maximum 3 attachments per vault account</p>
+        <p><strong>Rule:</strong> Maximum 20 attachments per vault account</p>
         <p><strong>Behavior:</strong> When vault would exceed limit, ALL operations (attach + detach) for that vault are rejected</p>
-        <p><strong>Example:</strong> Vault has 2 attachments, request tries to attach 2 more → 2+2=4 > 3 → ALL operations rejected</p>
+        <p><strong>Example:</strong> Vault has 18 attachments, request tries to attach 4 more → 18+4=22 > 20 → ALL operations rejected</p>
     </div>
 
     <div class="scenario rejection">
@@ -294,7 +292,7 @@ Response Schema:
 
     <h2>Key Business Logic</h2>
     <ul>
-        <li><strong>Capacity Management:</strong> 3 attachment limit per vault account</li>
+        <li><strong>Capacity Management:</strong> 20 attachment limit per vault account</li>
         <li><strong>Entire Vault Rejection:</strong> If capacity exceeded, ALL operations for that vault rejected</li>
         <li><strong>Protected vs Non-Protected:</strong> Protected tags require approval (pending), non-protected are immediate</li>
         <li><strong>Request ID Consistency:</strong> All protected operations in single API call share same request ID</li>
@@ -303,12 +301,44 @@ Response Schema:
     </ul>
 
     <h2>Edge Cases</h2>
+
+    <div class="scenario rejection">
+        <h4>Concurrent Tag Name Changes</h4>
+        <p><strong>Scenario:</strong> Two protected tags are simultaneously being changed to the same name</p>
+        <p><strong>First Approval:</strong> Tag that gets approved first wins the name</p>
+        <p><strong>Second Approval:</strong> Tag approval fails due to name conflict at database level</p>
+        <p><strong>Expected Behavior:</strong> Database constraint violation prevents duplicate names</p>
+        <p><strong>Recommended Approach:</strong> API-level validation should prevent this scenario by checking pending name changes</p>
+    </div>
+
+    <div class="scenario rejection">
+        <h4>Capacity Exceeded with Mixed Operations</h4>
+        <p><strong>Scenario:</strong> Vault has 18 attachments, request tries to attach 4 and detach 1</p>
+        <p><strong>Calculation:</strong> 18 current + 4 new = 22 > 20 limit</p>
+        <p><strong>Result:</strong> ALL operations (both attach and detach) rejected for that vault</p>
+        <p><strong>Reason:</strong> capacity_exceeded applied to maintain consistency</p>
+    </div>
+
+    <div class="scenario rejection">
+        <h4>Cross-Vault Processing</h4>
+        <p><strong>Scenario:</strong> Multiple vaults in request, only some exceed capacity</p>
+        <p><strong>Processing:</strong> Per-vault capacity calculation</p>
+        <p><strong>Result:</strong> Operations for exceeding vaults rejected, others processed normally</p>
+        <p><strong>Status:</strong> mixed_results</p>
+    </div>
+
+    <div class="scenario rejection">
+        <h4>Duplicate Tags in Request</h4>
+        <p><strong>Scenario:</strong> Same tag appears multiple times in attach array</p>
+        <p><strong>Processing:</strong> Each occurrence processed individually</p>
+        <p><strong>Result:</strong> Later duplicates rejected with attachment_already_exists</p>
+        <p><strong>No Prevention:</strong> System allows duplicate requests but processes logically</p>
+    </div>
+
+    <h3>Additional Edge Cases</h3>
     <ul>
-        <li><strong>Mixed Capacity Impact:</strong> Some vaults exceed capacity, others don't → mixed_results</li>
         <li><strong>Empty Arrays:</strong> Both attach and detach arrays cannot be empty</li>
-        <li><strong>Duplicate Tags in Request:</strong> Later duplicates get attachment_already_exists rejection</li>
-        <li><strong>Cross-Vault Processing:</strong> Each vault processed independently</li>
-        <li><strong>Maximum Scale:</strong> 10 vaults × 3 attach × 3 detach = 60 total operations (simulator), 10 vaults × 20 attach × 20 detach = 400 total operations (production)</li>
+        <li><strong>Maximum Scale:</strong> 10 vaults × 20 attach × 20 detach = 400 total operations</li>
         <li><strong>Concurrent Requests:</strong> Database locking prevents race conditions</li>
     </ul>
 
