@@ -335,6 +335,36 @@
                 <li><strong>Field Length Limits:</strong> Name and description have maximum length constraints</li>
             </ul>
         </div>
+
+        <div class="section">
+            <h3>Service Architecture Flow</h3>
+            <div class="rule-list">
+                <h4>Shell Service Responsibilities</h4>
+                <ul>
+                    <li><strong>Input Validation:</strong> Validates request format, required fields, data types</li>
+                    <li><strong>Permission Check:</strong> Verifies user has create tag permissions</li>
+                    <li><strong>Name Uniqueness Validation:</strong> Checks name uniqueness against Shell DB</li>
+                    <li><strong>Forward to Core:</strong> If valid, sends request to Core service</li>
+                </ul>
+
+                <h4>Core Service Responsibilities</h4>
+                <ul>
+                    <li><strong>Core DB Insert:</strong> Creates tag record in Core database (source of truth)</li>
+                    <li><strong>Response Generation:</strong> Returns created tag with generated ID and metadata</li>
+                </ul>
+
+                <h4>Shell Post-Processing</h4>
+                <ul>
+                    <li><strong>Shell DB Sync:</strong> After Core success, stores tag metadata in Shell database</li>
+                    <li><strong>User Response:</strong> Returns created tag to user</li>
+                </ul>
+            </div>
+            
+            <div class="example-block">
+                <div class="example-title">Flow Pattern</div>
+                <div class="code-block">User → Shell (validate + permissions) → Core (create in Core DB) → Shell (sync Shell DB) → User</div>
+            </div>
+        </div>
     </div>
 
     <div class="operation-section update" id="update-operations">
@@ -382,6 +412,37 @@
                 <li>Second approval fails due to database constraint violation</li>
             </ul>
         </div>
+
+        <div class="section">
+            <h3>Service Architecture Flow</h3>
+            <div class="rule-list">
+                <h4>Shell Service Responsibilities</h4>
+                <ul>
+                    <li><strong>Tag Existence Check:</strong> Verifies tag exists in Shell DB</li>
+                    <li><strong>Permission Check:</strong> Verifies user has edit tag permissions</li>
+                    <li><strong>Pending Operations Check:</strong> Validates no pending attach/detach operations exist</li>
+                    <li><strong>Name Uniqueness Check:</strong> If updating name, checks uniqueness against Shell DB</li>
+                    <li><strong>Forward to Core:</strong> If all validations pass, sends to Core</li>
+                </ul>
+
+                <h4>Core Service Responsibilities</h4>
+                <ul>
+                    <li><strong>Core DB Update:</strong> Updates tag record in Core database</li>
+                    <li><strong>Response Generation:</strong> Returns updated tag with new lastModified timestamp</li>
+                </ul>
+
+                <h4>Shell Post-Processing</h4>
+                <ul>
+                    <li><strong>Shell DB Sync:</strong> After Core success, updates Shell database with new tag metadata</li>
+                    <li><strong>User Response:</strong> Returns updated tag to user</li>
+                </ul>
+            </div>
+            
+            <div class="example-block">
+                <div class="example-title">Flow Pattern</div>
+                <div class="code-block">User → Shell (validate + permissions + pending check) → Core (update in Core DB) → Shell (sync Shell DB) → User</div>
+            </div>
+        </div>
     </div>
 
     <div class="operation-section delete" id="delete-operations">
@@ -418,6 +479,37 @@
     "pendingOperations": 2
   }
 }</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Service Architecture Flow</h3>
+            <div class="rule-list">
+                <h4>Shell Service Responsibilities</h4>
+                <ul>
+                    <li><strong>Tag Existence Check:</strong> Verifies tag exists in Shell DB</li>
+                    <li><strong>Permission Check:</strong> Verifies user has delete tag permissions</li>
+                    <li><strong>Active Attachments Check:</strong> Validates no active vault attachments exist</li>
+                    <li><strong>Pending Operations Check:</strong> Validates no pending attach/detach operations exist</li>
+                    <li><strong>Forward to Core:</strong> If all validations pass, sends delete request to Core</li>
+                </ul>
+
+                <h4>Core Service Responsibilities</h4>
+                <ul>
+                    <li><strong>Core DB Delete:</strong> Removes tag record from Core database</li>
+                    <li><strong>Response Generation:</strong> Returns success confirmation</li>
+                </ul>
+
+                <h4>Shell Post-Processing</h4>
+                <ul>
+                    <li><strong>Shell DB Sync:</strong> After Core success, removes tag from Shell database</li>
+                    <li><strong>User Response:</strong> Returns 204 No Content success response</li>
+                </ul>
+            </div>
+            
+            <div class="example-block">
+                <div class="example-title">Flow Pattern</div>
+                <div class="code-block">User → Shell (validate + permissions + usage check) → Core (delete from Core DB) → Shell (sync Shell DB) → User</div>
             </div>
         </div>
     </div>
@@ -616,6 +708,55 @@ Response Schema:
             <li>New operations are rejected if conflicting pending request exists</li>
             <li>Prevents multiple simultaneous approval workflows for same resource</li>
         </ul>
+    </div>
+
+    <div class="section">
+        <h3>Service Architecture Flow</h3>
+        <div class="rule-list">
+            <h4>Shell Service Responsibilities (Validation)</h4>
+            <ul>
+                <li><strong>Array Size Validation:</strong> Validates max 20 tags in attach/detach arrays</li>
+                <li><strong>Permission Check:</strong> Verifies user has attach/detach permissions</li>
+                <li><strong>Vault Account Existence:</strong> Verifies all vault IDs exist</li>
+                <li><strong>Tag Existence:</strong> Verifies all referenced tags exist in Shell DB</li>
+                <li><strong>Conflicting Operations:</strong> Ensures no tag appears in both arrays</li>
+                <li><strong>Tag Availability:</strong> Checks tags aren't being edited/deleted</li>
+                <li><strong>Priority-Based Error:</strong> Returns only first validation error encountered</li>
+                <li><strong>Forward to Core:</strong> If all validations pass, sends batch request to Core</li>
+            </ul>
+
+            <h4>Core Service Responsibilities (Sanitization)</h4>
+            <ul>
+                <li><strong>Input Sanitization:</strong> Alters/filters the input based on business rules</li>
+                <li><strong>Capacity Pre-Calculation:</strong> Calculates impact on vault capacity limits (20 per vault)</li>
+                <li><strong>Operation State Filtering:</strong> Removes already attached (attach) or not attached (detach) operations</li>
+                <li><strong>Pending Request Detection:</strong> Removes operations with conflicting pending requests</li>
+                <li><strong>Protected/Non-Protected Separation:</strong> Groups remaining operations by tag protection status</li>
+                <li><strong>Core DB Transaction:</strong> Atomically applies all sanitized operations</li>
+                <li><strong>Auditing:</strong> Records all protected operations for compliance</li>
+                <li><strong>Request ID Generation:</strong> Creates consistent request ID for protected operations</li>
+                <li><strong>Response Categorization:</strong> Builds applied/pending/rejected operation arrays</li>
+            </ul>
+
+            <h4>Shell Post-Processing</h4>
+            <ul>
+                <li><strong>Shell DB Sync:</strong> After Core success, updates Shell database with operation results</li>
+                <li><strong>User Response:</strong> Returns categorized results (applied/pending/rejected)</li>
+            </ul>
+        </div>
+        
+        <div class="example-block">
+            <div class="example-title">Flow Pattern</div>
+            <div class="code-block">User → Shell (validate + permissions) → Core (sanitize input + process + audit) → Shell (sync Shell DB) → User</div>
+        </div>
+
+        <div class="example-block">
+            <div class="example-title">Key Difference: Sanitization</div>
+            <div class="code-block">Unlike CREATE/UPDATE/DELETE operations, ATTACH/DETACH involves Core sanitization:
+- Core receives: ["tag1", "tag2", "tag3"] for vault "1"  
+- Core may sanitize to: ["tag2"] (removing tag1=already attached, tag3=capacity exceeded)
+- Core processes the sanitized input and returns categorized results</div>
+        </div>
     </div>
 
 
