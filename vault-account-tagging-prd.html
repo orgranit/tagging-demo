@@ -475,40 +475,115 @@ Response Schema:
 }</div>
     </div>
 
-    <div class="scenario rejection">
-        <h4>Business Rule Rejections</h4>
-        <ul>
-            <li><strong>capacity_exceeded:</strong> Vault would exceed 20-tag limit</li>
-            <li><strong>attachment_already_exists:</strong> Tag already attached to vault</li>
-            <li><strong>attachment_does_not_exist:</strong> Tag not currently attached to vault</li>
-            <li><strong>pending_request_exists:</strong> Conflicting pending approval request exists</li>
-        </ul>
+    <div class="section">
+        <h3>Business Rules</h3>
+        <div class="rule-list">
+            <h4>Rejected Operations</h4>
+            <ul>
+                <li><strong>capacity_exceeded:</strong> Vault would exceed 20-tag limit (ALL operations for that vault rejected)</li>
+                <li><strong>attachment_already_exists:</strong> Tag already attached to vault (attach operations)</li>
+                <li><strong>attachment_does_not_exist:</strong> Tag not currently attached to vault (detach operations)</li>
+                <li><strong>pending_request_exists:</strong> Conflicting pending approval request exists for same vault/tag</li>
+            </ul>
+            
+            <h4>Immediately Applied Operations</h4>
+            <ul>
+                <li><strong>Non-protected tags:</strong> Operations processed immediately → appliedOperations array</li>
+                <li><strong>Valid state transitions:</strong> Attach to unattached tags, detach from attached tags</li>
+                <li><strong>No capacity violations:</strong> Vault remains within 20-tag limit</li>
+                <li><strong>No conflicts:</strong> No pending requests for same vault/tag combination</li>
+            </ul>
+            
+            <h4>Pending Operations (Require Approval)</h4>
+            <ul>
+                <li><strong>Protected tags:</strong> Operations require approval → pendingOperations array</li>
+                <li><strong>Request ID consistency:</strong> All protected operations in same API call share identical request ID</li>
+                <li><strong>Valid after sanitization:</strong> Must pass all business rule checks before becoming pending</li>
+            </ul>
+        </div>
+    </div>
 
-        <p><strong>Business Rule Rejection Example:</strong></p>
-        <div class="code">{
-  "status": "all_rejected",
-  "message": "4 rejected",
-  "appliedOperations": [],
-  "pendingOperations": [],
-  "rejectedOperations": [
+    <div class="section">
+        <h3>Sanitization Rules (Processing Order)</h3>
+        <ol>
+            <li><strong>Capacity Pre-Calculation:</strong> Calculate vault capacity impact before processing any operations</li>
+            <li><strong>Operation State Filtering:</strong> Check if tag is already attached (attach) or not attached (detach)</li>
+            <li><strong>Pending Request Detection:</strong> Verify no conflicting pending approval requests exist</li>
+            <li><strong>Protected Tag Separation:</strong> Separate operations by tag protection status for processing</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <h3>Response Examples</h3>
+        
+        <div class="example-block">
+            <div class="example-title">All Applied Example</div>
+            <div class="code-block">{
+  "status": "all_applied",
+  "message": "3 applied",
+  "appliedOperations": [
     {
       "vaultAccountId": "1",
-      "tagId": "tag1", 
+      "tagId": "t1-non-protected",
+      "action": "attach",
+      "status": "final"
+    }
+  ],
+  "pendingOperations": [],
+  "rejectedOperations": []
+}</div>
+        </div>
+        
+        <div class="example-block">
+            <div class="example-title">Mixed Results Example</div>
+            <div class="code-block">{
+  "status": "mixed_results",
+  "message": "1 applied, 1 pending, 2 rejected",
+  "appliedOperations": [
+    {
+      "vaultAccountId": "1",
+      "tagId": "t1-non-protected",
+      "action": "attach",
+      "status": "final"
+    }
+  ],
+  "pendingOperations": [
+    {
+      "vaultAccountId": "2",
+      "tagId": "t2-protected",
+      "action": "attach",
+      "status": "pending",
+      "requestId": "REQ-A1B2C3"
+    }
+  ],
+  "rejectedOperations": [
+    {
+      "vaultAccountId": "3",
+      "tagId": "t3-non-protected",
       "action": "attach",
       "reason": "capacity_exceeded"
     }
   ]
 }</div>
-    </div>
-
-    <div class="scenario success">
-        <h4>Success Scenarios</h4>
-        <ol>
-            <li><strong>all_applied:</strong> All operations completed immediately (non-protected tags only)</li>
-            <li><strong>all_pending:</strong> All operations require approval (protected tags only)</li>
-            <li><strong>mixed_results:</strong> Operations distributed across applied/pending/rejected</li>
-            <li><strong>all_rejected:</strong> All operations failed business rule checks</li>
-        </ol>
+        </div>
+        
+        <div class="example-block">
+            <div class="example-title">All Rejected Example</div>
+            <div class="code-block">{
+  "status": "all_rejected",
+  "message": "2 rejected",
+  "appliedOperations": [],
+  "pendingOperations": [],
+  "rejectedOperations": [
+    {
+      "vaultAccountId": "1",
+      "tagId": "t1-non-protected",
+      "action": "attach",
+      "reason": "attachment_already_exists"
+    }
+  ]
+}</div>
+        </div>
     </div>
 
     <div class="scenario attach">
@@ -543,22 +618,6 @@ Response Schema:
         </ul>
     </div>
 
-    <div class="scenario success">
-        <h4>Protected vs Non-Protected Flow</h4>
-        
-        <h5>Non-Protected Tags:</h5>
-        <ul>
-            <li>Immediate processing → <code>appliedOperations</code> array</li>
-            <li>Status: <code>final</code></li>
-        </ul>
-
-        <h5>Protected Tags:</h5>
-        <ul>
-            <li>Require approval → <code>pendingOperations</code> array</li>
-            <li>Status: <code>pending</code></li>
-            <li>Include <code>requestId</code> (shared across all protected operations in same API call)</li>
-        </ul>
-    </div>
 
     <div class="operation-section state" id="tag-state-management">
         <h2>Tag State Management</h2>
