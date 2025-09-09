@@ -292,7 +292,7 @@ info:
     
     ## Key Features
     - **Protected vs Non-Protected Tags**: Protected tags require approval, non-protected apply immediately
-    - **Capacity Management**: Maximum 3 attachments per vault account
+    - **Capacity Management**: Maximum 20 attachments per vault account
     - **Batch Operations**: Single API call for multiple vault accounts and tags
     - **Comprehensive Validation**: Input validation with detailed error responses
     
@@ -315,8 +315,8 @@ info:
     
     **Validation Scenarios (400 responses):**
     - ⚠️ **Invalid vault IDs** - Non-numeric vault account IDs
-    - ⚠️ **Too many tags to attach** - Exceeds 3 tag limit
-    - ⚠️ **Too many tags to detach** - Exceeds 3 tag limit  
+    - ⚠️ **Too many tags to attach** - Exceeds 20 tag limit
+    - ⚠️ **Too many tags to detach** - Exceeds 20 tag limit  
     - ⚠️ **Conflicting operations** - Same tag in attach and detach
     - ⚠️ **Tags not found** - Non-existent tag references
     - ⚠️ **Tags being edited** - Tags currently being modified
@@ -334,6 +334,115 @@ servers:
     description: Mock server - returns predefined responses based on input scenarios
 
 paths:
+  /taggingService/tag/{id}:
+    patch:
+      summary: Update tag properties
+      description: |
+        Update tag name, description, or protection status.
+        
+        **Important Restrictions:**
+        - Cannot edit tags that have pending attach/detach operations
+        - Tag names must be unique across the system
+        - Only provided fields are updated (PATCH semantics)
+      operationId: updateTag
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Tag ID to update
+          schema:
+            type: string
+            example: "tag-123"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTagRequest'
+            examples:
+              update_name:
+                summary: "Update tag name"
+                value:
+                  name: "updated-tag-name"
+              update_description:
+                summary: "Update tag description"
+                value:
+                  description: "Updated tag description"
+              update_protection:
+                summary: "Update protection status"
+                value:
+                  protected: false
+              full_update:
+                summary: "Update all fields"
+                value:
+                  name: "compliance-v2"
+                  description: "Updated compliance tag for v2 requirements"
+                  protected: true
+      responses:
+        '200':
+          description: Tag updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '400':
+          description: Invalid request or tag has pending operations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagError'
+        '404':
+          description: Tag not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete tag
+      description: |
+        Delete a tag from the system.
+        
+        **Important Restrictions:**
+        - Cannot delete tags with active attachments to vault accounts
+        - Cannot delete tags with pending attach/detach operations
+        - Deletion is permanent and cannot be undone
+      operationId: deleteTag
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Tag ID to delete
+          schema:
+            type: string
+            example: "tag-123"
+      responses:
+        '204':
+          description: Tag deleted successfully
+        '400':
+          description: Tag cannot be deleted (in use or has pending operations)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagError'
+        '404':
+          description: Tag not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /vault/accounts/tags:
     post:
       summary: Batch attach/detach tags to vault accounts
@@ -342,7 +451,7 @@ paths:
         
         **Processing Logic:**
         1. **Input Validation**: Validates arrays, tag existence, and constraints
-        2. **Capacity Check**: Ensures vault accounts don't exceed 3 total attachments
+        2. **Capacity Check**: Ensures vault accounts don't exceed 20 total attachments
         3. **Operation Processing**: Handles protected vs non-protected tags differently
         4. **Response Generation**: Returns applied, pending, and rejected operations
       operationId: batchUpdateVaultAccountTags
@@ -717,6 +826,91 @@ paths:
 
 components:
   schemas:
+    UpdateTagRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: New tag name (must be unique)
+          example: "compliance-v2"
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          description: New tag description
+          example: "Updated compliance requirements"
+          maxLength: 500
+        protected:
+          type: boolean
+          description: Whether the tag requires approval for operations
+          example: true
+      additionalProperties: false
+
+    Tag:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - protected
+        - lastModified
+      properties:
+        id:
+          type: string
+          description: Unique tag identifier
+          example: "tag-123"
+        name:
+          type: string
+          description: Tag name
+          example: "compliance"
+        description:
+          type: string
+          description: Tag description
+          example: "Compliance-related tag for regulatory requirements"
+        protected:
+          type: boolean
+          description: Whether the tag requires approval for attach/detach operations
+          example: true
+        lastModified:
+          type: string
+          format: date-time
+          description: Last modification timestamp in ISO 8601 format
+          example: "2025-01-15T10:30:00Z"
+
+    TagError:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          enum:
+            - "tag_has_pending_operations"
+            - "tag_in_use"
+            - "validation_failed"
+            - "name_already_exists"
+          description: Specific error code
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          description: Additional error details
+          properties:
+            pendingOperations:
+              type: integer
+              description: Number of pending operations (for pending operations error)
+              example: 3
+            activeAttachments:
+              type: integer
+              description: Number of active attachments (for tag in use error)
+              example: 5
+            field:
+              type: string
+              description: Field that caused the error (for validation errors)
+              example: "name"
+
     BatchTagRequest:
       type: object
       required:
@@ -737,15 +931,15 @@ components:
           type: array
           items:
             type: string
-          maxItems: 3
-          description: Array of tag IDs to attach (maximum 3)
+          maxItems: 20
+          description: Array of tag IDs to attach (maximum 20)
           example: ["compliance", "high-priority"]
         tagIdsToDetach:
           type: array
           items:
             type: string
-          maxItems: 3
-          description: Array of tag IDs to detach (maximum 3)
+          maxItems: 20
+          description: Array of tag IDs to detach (maximum 20)
           example: ["temporary", "review-needed"]
 
     BatchTagResponse:
